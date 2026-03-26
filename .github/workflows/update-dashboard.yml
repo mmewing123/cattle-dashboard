@@ -39,10 +39,16 @@ jobs:
         run: |
           python build_dashboard.py --api-key "$MARS_API_KEY" --output docs/index.html
 
+      - name: Write market data for RM comparison        ← ADD THIS WHOLE BLOCK
+        env:
+          MARS_API_KEY: ${{ secrets.MARS_API_KEY }}
+        run: |
+          python write_market_data.py
+
       - name: Commit & push updated dashboard
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add docs/index.html
+          git add docs/index.html/market_data.json
           git diff --staged --quiet || git commit -m "📊 Update dashboard $(date -u +%Y-%m-%d)"
           git push
