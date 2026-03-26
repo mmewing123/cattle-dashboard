@@ -6,7 +6,7 @@
 <title>BRI – RM Cost vs Market</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
+
 <style>
   :root {
     --bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;
@@ -455,8 +455,17 @@ function chartOpts(yLabel) {
         callbacks:{label:c=>' '+c.dataset.label+': $'+c.parsed.y.toFixed(2)}}
     },
     scales:{
-      x:{type:'time',time:{unit:'month',displayFormats:{month:"MMM ''yy"}},
-         grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:11}}},
+      x:{type:'category',
+         grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},
+           callback:function(val,i){
+             // Show label every ~4th point to avoid crowding, always show first/last
+             const lbl = this.getLabelForValue(val);
+             if(!lbl) return '';
+             const parts = lbl.split('-');
+             const short = (parts[1]||'') + '/' + (parts[2]||'');
+             return (i % 4 === 0) ? short : '';
+           }
+         }},
       y:{grid:{color:'#2a2d3e'},
          ticks:{color:'#64748b',font:{size:11},callback:v=>'$'+v.toFixed(2)},
          title:{display:true,text:yLabel,color:'#64748b',font:{size:11}}}
