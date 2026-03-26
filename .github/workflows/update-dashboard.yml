@@ -1,0 +1,48 @@
+name: Update Dashboard
+
+on:
+  # Runs daily at 9:30 PM UTC (3:30 PM Central)
+  schedule:
+    - cron: '30 21 * * 1-5'   # Mon-Fri after markets close
+  
+  # Manual trigger from GitHub UI
+  workflow_dispatch:
+
+  # Also run on push to main (for initial setup)
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Pull data & build dashboard
+        env:
+          MARS_API_KEY: ${{ secrets.MARS_API_KEY }}
+        run: |
+          python build_dashboard.py --api-key "$MARS_API_KEY" --output docs/index.html
+
+      - name: Commit & push updated dashboard
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add docs/index.html
+          git diff --staged --quiet || git commit -m "📊 Update dashboard $(date -u +%Y-%m-%d)"
+          git push
