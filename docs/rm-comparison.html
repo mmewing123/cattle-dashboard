@@ -165,7 +165,13 @@
     </div>
 
     <div class="table-card" id="txn-card" style="display:none">
-      <div class="table-head-row">Purchase Transactions</div>
+      <div class="table-head-row" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Purchase Transactions</span>
+        <button onclick="saveShared()" style="background:var(--accent2);border:none;color:#fff;
+          padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600">
+          💾 Save for Sharing
+        </button>
+      </div>
       <div class="filter-row" id="filter-row">
         <button class="filter-btn active" data-f="all">All</button>
         <button class="filter-btn" data-f="corn">🌽 Corn</button>
@@ -258,6 +264,32 @@ async function loadMarketData() {
     marketData = await r.json();
   } catch {
     marketData = null;
+  }
+  // After market data loads, try to auto-load shared transaction data
+  await loadSharedTransactions();
+}
+
+async function loadSharedTransactions() {
+  try {
+    const r = await fetch('./rm_transactions.json?' + Date.now());
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.transactions || !data.transactions.length) return;
+    // Re-attach mktPrice using freshly loaded market data
+    const txns = data.transactions.map(t => ({
+      ...t,
+      dateObj: new Date(t.dateStr),
+      mktPrice: getMarketPrice(
+        t.type === 'corn' ? 'corn' : t.type === 'alfalfa' ? 'hay_alfalfa' : 'hay_grass',
+        t.dateStr
+      ),
+    }));
+    document.getElementById('file-info').textContent =
+      '✓ Shared data loaded — ' + data.source + ' (' + data.generated + ')';
+    document.getElementById('drop-zone').classList.add('loaded');
+    renderAll(txns);
+  } catch {
+    // No shared file — normal, just wait for upload
   }
 }
 
@@ -570,6 +602,39 @@ function renderTable(txns, filter) {
       <td>${impact}</td>
     </tr>`;
   }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// SAVE FOR SHARING
+// Exports parsed transactions as rm_transactions.json
+// Upload that file to docs/ in your GitHub repo —
+// executives will then see the data without uploading anything
+// ══════════════════════════════════════════════════════
+function saveShared() {
+  if (!allTxns.length) {
+    alert('No data loaded yet — upload a Centerpoint file first.');
+    return;
+  }
+  // Strip dateObj (not serializable) and mktPrice (re-computed on load)
+  const clean = allTxns.map(({ dateObj, mktPrice, ...rest }) => rest);
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Feed & Medicine RM Inventory',
+    transactions: clean,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rm_transactions.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setTimeout(() => alert(
+    'rm_transactions.json downloaded.\n\n' +
+    'Upload it to your GitHub repo at:\n' +
+    '  docs/rm_transactions.json\n\n' +
+    'After that, anyone who visits the dashboard will see\n' +
+    'this data automatically after entering the password — no upload needed.'
+  ), 300);
 }
 </script>
 </body>
