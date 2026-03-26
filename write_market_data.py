@@ -1,20 +1,12 @@
 """
 write_market_data.py
 ────────────────────
-Add this file to your cattle-dashboard/ GitHub repo.
-It is called automatically by the GitHub Actions workflow (or you can run it manually).
-
-What it does:
-  - Pulls corn elevator bids for the Alliance, NE area from USDA MARS API (report 3225)
-  - Pulls Nebraska Direct Hay prices from USDA MARS API (report 2935)
-  - Writes market_data.json into the docs/ folder so the rm-comparison.html page
-    can overlay USDA benchmarks on your Centerpoint purchase data
-
-Requirements: same MARS_API_KEY secret already used by build_dashboard.py
+Pulls USDA MARS corn and hay prices and writes docs/market_data.json
+for the rm-comparison.html dashboard.
 """
 
 import os, json, requests, argparse
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
 
 parser = argparse.ArgumentParser()
@@ -26,134 +18,110 @@ API_KEY  = args.api_key
 OUT_FILE = args.output
 BASE_URL = "https://marsapi.ams.usda.gov/services/v1.2/reports"
 
-# Must use Basic Auth (key as username, empty password) — same as build_dashboard.py
 session = requests.Session()
 session.auth = (API_KEY, "")
 session.headers.update({"Accept": "application/json"})
 
-# ── How far back to pull ──────────────────────────────────────────────────────
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CORN  — USDA report 3225: Nebraska Daily Elevator Grain Bids
-# We filter for Alliance and nearby Panhandle locations then take the daily avg
-# ─────────────────────────────────────────────────────────────────────────────
-ALLIANCE_LOCATIONS = {
-    "ALLIANCE", "HEMINGFORD", "HAY SPRINGS", "GORDON", "CHADRON",
-    "CRAWFORD", "RUSHVILLE", "HAY SPRINGS", "SCOTTSBLUFF"
-}
+def normalize_date(d):
+    """Convert MM/DD/YYYY to YYYY-MM-DD. Pass through YYYY-MM-DD unchanged."""
+    d = str(d).strip()[:10]
+    if "/" in d:
+        try:
+            p = d.split("/")
+            year = p[2] if len(p[2]) == 4 else "20" + p[2]
+            return f"{year}-{p[0].zfill(2)}-{p[1].zfill(2)}"
+        except Exception:
+            return d
+    return d
 
-def fetch_corn():
-    params = {
-        "allSections": "true",
-        "lastDays":    365,
-    }
-    resp = session.get(f"{BASE_URL}/3225", params=params, timeout=60)
-    resp.raise_for_status()
-    data = resp.json()
 
-    # Group bids by date, average the Panhandle elevator cash bids
-    # Field names from build_dashboard.py: report_date, trade_loc, avg_price
-    by_date = defaultdict(list)
+def unpack_rows(data):
+    """Flatten MARS nested section structure into a flat list of rows."""
     results = data.get("results", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
-    # Handle nested structure (sections with their own results arrays)
     rows = []
     for item in results:
         if isinstance(item, dict) and "results" in item and isinstance(item["results"], list):
             rows.extend(item["results"])
-        else:
+        elif isinstance(item, dict):
             rows.append(item)
+    return rows
 
-    for row in rows:
-        loc = str(row.get("trade_loc", row.get("Location", ""))).upper()
-        if not any(a in loc for a in ALLIANCE_LOCATIONS):
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CORN — report 3225: Nebraska Daily Elevator Grain Bids
+# ─────────────────────────────────────────────────────────────────────────────
+def fetch_corn():
+    print("  Fetching report 3225 (corn)...")
+    resp = session.get(f"{BASE_URL}/3225", params={"allSections": "true", "lastDays": 365}, timeout=60)
+    resp.raise_for_status()
+    rows = unpack_rows(resp.json())
+    print(f"  Total rows: {len(rows)}")
+
+    # Filter to Corn rows only
+    corn_rows = [r for r in rows if "corn" in str(r.get("commodity", r.get("Commodity", ""))).lower()]
+    print(f"  Corn rows: {len(corn_rows)}")
+
+    if not corn_rows and rows:
+        sample = rows[0]
+        print(f"  Sample keys: {list(sample.keys())[:15]}")
+        print(f"  Sample values: { {k: sample[k] for k in list(sample.keys())[:8]} }")
+
+    by_date = defaultdict(list)
+    for row in corn_rows:
+        price = row.get("avg_price") or row.get("Avg_Price") or row.get("price")
+        date  = row.get("report_date") or row.get("Report_Date") or row.get("report_begin_date")
+        if not price or not date:
             continue
-        bid = row.get("avg_price") or row.get("Cash_Price") or row.get("Price")
-        date = str(row.get("report_date", row.get("Report_Date", "")))
-        # Normalize MM/DD/YYYY → YYYY-MM-DD
-        if date and "/" in date:
-            try:
-                p = date.split("/")
-                date = f"{p[2][:4]}-{p[0].zfill(2)}-{p[1].zfill(2)}"
-            except Exception:
-                pass
-        date = date[:10]
-        if bid and date:
-            try:
-                by_date[date].append(float(bid))
-            except (ValueError, TypeError):
-                pass
+        try:
+            by_date[normalize_date(date)].append(float(price))
+        except (ValueError, TypeError):
+            pass
 
-    # Return list sorted by date, price = avg bid in $/bu
-    result = []
-    for date in sorted(by_date):
-        avg = sum(by_date[date]) / len(by_date[date])
-        result.append({"date": date, "price": round(avg, 4)})
-    if not result:
-        # Debug: print first row keys so we can verify field names
-        sample = rows[:1]
-        print(f"  WARNING: 0 corn rows matched. Total rows from API: {len(rows)}")
-        if sample:
-            print(f"  Sample row keys: {list(sample[0].keys())[:15]}")
-            print(f"  Sample row: { {k:sample[0][k] for k in list(sample[0].keys())[:8]} }")
-    print(f"  Corn: {len(result)} daily data points")
+    result = [{"date": d, "price": round(sum(v)/len(v), 4)} for d, v in sorted(by_date.items())]
+    print(f"  Corn data points: {len(result)}")
     return result
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HAY  — USDA report 2935: Nebraska Direct Hay Report
-# Alfalfa (Supreme/Premium) and Grass Hay, $/ton
+# HAY — report 2935: Nebraska Direct Hay Report, dates normalized to YYYY-MM-DD
 # ─────────────────────────────────────────────────────────────────────────────
 def fetch_hay():
-    params = {
-        "allSections": "true",
-        "lastDays":    365,
-    }
-    resp = session.get(f"{BASE_URL}/2935", params=params, timeout=60)
+    print("  Fetching report 2935 (hay)...")
+    resp = session.get(f"{BASE_URL}/2935", params={"allSections": "true", "lastDays": 365}, timeout=60)
     resp.raise_for_status()
-    data = resp.json()
+    rows = unpack_rows(resp.json())
+    print(f"  Total rows: {len(rows)}")
 
     alfa_by_date  = defaultdict(list)
     grass_by_date = defaultdict(list)
 
-    results = data.get("results", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
-    rows = []
-    for item in results:
-        if isinstance(item, dict) and "results" in item and isinstance(item["results"], list):
-            rows.extend(item["results"])
-        else:
-            rows.append(item)
-
     for row in rows:
-        # build_dashboard.py uses: class, quality, report_begin_date, wtd_Avg_Price
-        commodity  = str(row.get("class", row.get("Commodity", ""))).lower()
-        grade      = str(row.get("quality", row.get("Grade", ""))).lower()
-        date       = str(row.get("report_begin_date", row.get("Report_Date", "")))[:10]
-        price_str  = row.get("wtd_Avg_Price") or row.get("Wtd_Avg") or row.get("Price")
+        commodity = str(row.get("class", row.get("Commodity", ""))).lower()
+        date_raw  = row.get("report_begin_date") or row.get("report_date") or row.get("Report_Date", "")
+        price_str = row.get("wtd_Avg_Price") or row.get("Wtd_Avg") or row.get("avg_price") or row.get("Price")
 
-        if not date or not price_str:
+        if not date_raw or not price_str:
             continue
         try:
             price = float(price_str)
+            if price < 10:
+                continue
         except (ValueError, TypeError):
             continue
 
-        if "alfalfa" in commodity and any(g in grade for g in ["supreme","premium","good"]):
+        date = normalize_date(date_raw)
+
+        if "alfalfa" in commodity:
             alfa_by_date[date].append(price)
-        elif any(g in commodity for g in ["grass","brome","prairie","meadow"]):
+        elif any(g in commodity for g in ["grass", "brome", "prairie", "meadow", "native"]):
             grass_by_date[date].append(price)
 
-    alfa_result  = [{"date": d, "price": round(sum(v)/len(v), 2)}
-                    for d, v in sorted(alfa_by_date.items())]
-    grass_result = [{"date": d, "price": round(sum(v)/len(v), 2)}
-                    for d, v in sorted(grass_by_date.items())]
+    alfa_result  = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(alfa_by_date.items())]
+    grass_result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(grass_by_date.items())]
 
-    if not alfa_result and not grass_result:
-        sample = rows[:1]
-        print(f"  WARNING: 0 hay rows matched. Total rows: {len(rows)}")
-        if sample:
-            print(f"  Sample hay keys: {list(sample[0].keys())[:15]}")
-    print(f"  Alfalfa: {len(alfa_result)} data points")
-    print(f"  Grass:   {len(grass_result)} data points")
+    print(f"  Alfalfa data points: {len(alfa_result)}")
+    print(f"  Grass data points:   {len(grass_result)}")
     return alfa_result, grass_result
 
 
@@ -161,10 +129,10 @@ def fetch_hay():
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
-    print("Fetching corn data…")
+    print("\nFetching corn data...")
     corn = fetch_corn()
 
-    print("Fetching hay data…")
+    print("\nFetching hay data...")
     alfa, grass = fetch_hay()
 
     market = {
@@ -174,11 +142,11 @@ def main():
         "hay_grass":   grass,
     }
 
-    os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
+    os.makedirs(os.path.dirname(OUT_FILE) or ".", exist_ok=True)
     with open(OUT_FILE, "w") as f:
         json.dump(market, f, indent=2)
 
-    print(f"\n✓ Written {OUT_FILE}")
+    print(f"\nWritten {OUT_FILE}")
     print(f"  Corn pts:    {len(corn)}")
     print(f"  Alfalfa pts: {len(alfa)}")
     print(f"  Grass pts:   {len(grass)}")
