@@ -25,7 +25,11 @@ args = parser.parse_args()
 API_KEY  = args.api_key
 OUT_FILE = args.output
 BASE_URL = "https://marsapi.ams.usda.gov/services/v1.2/reports"
-HEADERS  = {"Accept": "application/json"}   # key goes in query string, not header
+
+# Must use Basic Auth (key as username, empty password) — same as build_dashboard.py
+session = requests.Session()
+session.auth = (API_KEY, "")
+session.headers.update({"Accept": "application/json"})
 
 # ── How far back to pull ──────────────────────────────────────────────────────
 START_DATE = (datetime.today() - timedelta(days=365)).strftime("%m/%d/%Y")
@@ -42,23 +46,40 @@ ALLIANCE_LOCATIONS = {
 
 def fetch_corn():
     params = {
-        "api_key":         API_KEY,
         "q":               "commodity=Corn;report_begin_date=" + START_DATE,
         "report_end_date": END_DATE,
         "allSections":     "true",
     }
-    resp = requests.get(f"{BASE_URL}/3225", headers=HEADERS, params=params, timeout=30)
+    resp = session.get(f"{BASE_URL}/3225", params=params, timeout=60)
     resp.raise_for_status()
     data = resp.json()
 
     # Group bids by date, average the Panhandle elevator cash bids
+    # Field names from build_dashboard.py: report_date, trade_loc, avg_price
     by_date = defaultdict(list)
-    for row in data.get("results", []):
-        loc = str(row.get("Location", "")).upper()
+    results = data.get("results", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+    # Handle nested structure (sections with their own results arrays)
+    rows = []
+    for item in results:
+        if isinstance(item, dict) and "results" in item and isinstance(item["results"], list):
+            rows.extend(item["results"])
+        else:
+            rows.append(item)
+
+    for row in rows:
+        loc = str(row.get("trade_loc", row.get("Location", ""))).upper()
         if not any(a in loc for a in ALLIANCE_LOCATIONS):
             continue
-        bid = row.get("Cash_Price") or row.get("Bid_Price") or row.get("Price")
-        date = row.get("Report_Date", "")[:10]   # YYYY-MM-DD
+        bid = row.get("avg_price") or row.get("Cash_Price") or row.get("Price")
+        date = str(row.get("report_date", row.get("Report_Date", "")))
+        # Normalize MM/DD/YYYY → YYYY-MM-DD
+        if date and "/" in date:
+            try:
+                p = date.split("/")
+                date = f"{p[2][:4]}-{p[0].zfill(2)}-{p[1].zfill(2)}"
+            except Exception:
+                pass
+        date = date[:10]
         if bid and date:
             try:
                 by_date[date].append(float(bid))
@@ -80,23 +101,31 @@ def fetch_corn():
 # ─────────────────────────────────────────────────────────────────────────────
 def fetch_hay():
     params = {
-        "api_key":         API_KEY,
         "q":               "report_begin_date=" + START_DATE,
         "report_end_date": END_DATE,
         "allSections":     "true",
     }
-    resp = requests.get(f"{BASE_URL}/2935", headers=HEADERS, params=params, timeout=30)
+    resp = session.get(f"{BASE_URL}/2935", params=params, timeout=60)
     resp.raise_for_status()
     data = resp.json()
 
     alfa_by_date  = defaultdict(list)
     grass_by_date = defaultdict(list)
 
-    for row in data.get("results", []):
-        commodity  = str(row.get("Commodity",  "")).lower()
-        grade      = str(row.get("Grade",       "")).lower()
-        date       = str(row.get("Report_Date", ""))[:10]
-        price_str  = row.get("Wtd_Avg") or row.get("Price") or row.get("High")
+    results = data.get("results", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+    rows = []
+    for item in results:
+        if isinstance(item, dict) and "results" in item and isinstance(item["results"], list):
+            rows.extend(item["results"])
+        else:
+            rows.append(item)
+
+    for row in rows:
+        # build_dashboard.py uses: class, quality, report_begin_date, wtd_Avg_Price
+        commodity  = str(row.get("class", row.get("Commodity", ""))).lower()
+        grade      = str(row.get("quality", row.get("Grade", ""))).lower()
+        date       = str(row.get("report_begin_date", row.get("Report_Date", "")))[:10]
+        price_str  = row.get("wtd_Avg_Price") or row.get("Wtd_Avg") or row.get("Price")
 
         if not date or not price_str:
             continue
