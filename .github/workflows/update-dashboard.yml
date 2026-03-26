@@ -43,7 +43,7 @@ jobs:
         env:
           MARS_API_KEY: ${{ secrets.MARS_API_KEY }}
         run: |
-          python write_market_data.py
+          python write_market_data.py --api-key "$MARS_API_KEY" --output docs/market_data.json
 
       - name: Commit & push updated dashboard
         run: |
