@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRI – RM Cost vs Market</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;
+    --accent:#3b82f6;--accent2:#10b981;--accent3:#f59e0b;
+    --text:#e2e8f0;--muted:#64748b;--danger:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+
+  /* GATE */
+  #gate{display:flex;align-items:center;justify-content:center;min-height:100vh;
+    background:radial-gradient(ellipse at center,#1a1d27 0%,#0f1117 70%);}
+  .gate-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:48px 56px;text-align:center;width:380px;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+  .gate-logo{font-size:2rem;font-weight:800;letter-spacing:-1px;}
+  .gate-logo span{color:var(--accent);}
+  .gate-sub{color:var(--muted);font-size:.875rem;margin-top:6px;margin-bottom:32px;}
+  .gate-label{display:block;text-align:left;font-size:.75rem;font-weight:600;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+  .gate-input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s;}
+  .gate-input:focus{border-color:var(--accent);}
+  .gate-btn{width:100%;margin-top:16px;padding:13px;background:var(--accent);border:none;
+    border-radius:8px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;}
+  .gate-btn:hover{opacity:.85;}
+  .gate-error{color:var(--danger);font-size:.875rem;margin-top:12px;min-height:20px;}
+
+  /* APP */
+  #app{display:none;}
+  .top-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 32px;border-bottom:1px solid var(--border);
+    background:var(--surface);position:sticky;top:0;z-index:10;}
+  .brand{font-size:1.1rem;font-weight:700;}
+  .brand span{color:var(--accent);}
+  .lock-btn{background:none;border:1px solid var(--border);color:var(--muted);
+    padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;transition:all .2s;}
+  .lock-btn:hover{border-color:var(--accent);color:var(--text);}
+  .content{padding:32px;max-width:1300px;margin:0 auto;}
+
+  /* UPLOAD */
+  .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:48px;
+    text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);margin-bottom:32px;}
+  .upload-zone.drag-over{border-color:var(--accent);background:rgba(59,130,246,.05);}
+  .upload-zone.loaded{border-color:var(--accent2);border-style:solid;}
+  .upload-icon{font-size:2.5rem;margin-bottom:12px;}
+  .upload-title{font-size:1.1rem;font-weight:600;margin-bottom:6px;}
+  .upload-sub{color:var(--muted);font-size:.875rem;}
+  .upload-input{display:none;}
+  .file-info{margin-top:12px;font-size:.875rem;color:var(--accent2);font-weight:500;}
+
+  /* STATS */
+  .stat-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px;}
+  .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px;}
+  .stat-pill .slabel{font-size:.72rem;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.08em;margin-bottom:4px;}
+  .stat-pill .sval{font-size:1.25rem;font-weight:700;}
+  .green{color:var(--accent2);} .red{color:var(--danger);} .yellow{color:var(--accent3);}
+
+  /* CHARTS */
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;}
+  @media(max-width:900px){.chart-grid{grid-template-columns:1fr;}}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;}
+  .chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+  .chart-title{font-size:1rem;font-weight:700;}
+  .chart-sub{color:var(--muted);font-size:.8rem;margin-top:3px;}
+  .badge{font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  .badge-green{background:rgba(16,185,129,.15);color:var(--accent2);}
+  .badge-red{background:rgba(239,68,68,.15);color:var(--danger);}
+  .badge-neutral{background:rgba(100,116,139,.15);color:var(--muted);}
+  canvas{max-height:300px;}
+
+  /* TABLE */
+  .table-card{background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;margin-bottom:32px;}
+  .table-head-row{padding:18px 24px;border-bottom:1px solid var(--border);font-weight:700;}
+  .filter-row{display:flex;gap:8px;padding:10px 24px;border-bottom:1px solid var(--border);}
+  .filter-btn{background:none;border:1px solid var(--border);color:var(--muted);
+    padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;transition:all .15s;}
+  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.84rem;}
+  th{padding:10px 16px;text-align:left;font-size:.72rem;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);}
+  td{padding:9px 16px;border-bottom:1px solid rgba(42,45,62,.5);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(59,130,246,.03);}
+  .vs-below{color:var(--accent2);font-weight:600;}
+  .vs-above{color:var(--danger);font-weight:600;}
+  .vs-na{color:var(--muted);}
+
+  /* NOTICE */
+  .mkt-note{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);
+    border-radius:8px;padding:12px 16px;font-size:.82rem;color:var(--accent3);margin-bottom:24px;}
+
+  /* EMPTY */
+  .empty{text-align:center;padding:80px 32px;color:var(--muted);}
+  .empty .eicon{font-size:3rem;margin-bottom:16px;opacity:.3;}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">Black<span>Ranches</span></div>
+    <div class="gate-sub">RM Cost vs. Market Dashboard</div>
+    <label class="gate-label" for="pw">Password</label>
+    <input class="gate-input" id="pw" type="password" placeholder="Enter password" autocomplete="current-password">
+    <button class="gate-btn" onclick="doLogin()">Access Dashboard →</button>
+    <div class="gate-error" id="pw-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="brand">Black<span>Ranches</span> &middot; RM Cost vs. Market</div>
+    <button class="lock-btn" onclick="lock()">🔒 Lock</button>
+  </div>
+
+  <div class="content">
+
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('fi').click()">
+      <div class="upload-icon">📂</div>
+      <div class="upload-title">Drop Centerpoint Feed &amp; Medicine RM Inventory Export Here</div>
+      <div class="upload-sub">Click to browse — accepts .xlsx files exported from Centerpoint</div>
+      <div class="file-info" id="file-info"></div>
+      <input type="file" class="upload-input" id="fi" accept=".xlsx,.xls">
+    </div>
+
+    <div class="stat-bar" id="stat-bar"></div>
+    <div class="mkt-note" id="mkt-note" style="display:none">
+      ⚠ Market comparison not available — <strong>market_data.json</strong> was not found beside this page.
+      The charts will show your purchase prices only. Add the file to your GitHub repo to enable vs-market overlays.
+      See the README for the required format.
+    </div>
+
+    <div class="chart-grid" id="chart-grid" style="display:none">
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">Cracked Corn — $/bu</div>
+               <div class="chart-sub">Purchase price vs. Alliance USDA elevator bid</div></div>
+          <span class="badge badge-neutral" id="corn-badge">No market data</span>
+        </div>
+        <canvas id="corn-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">Hay (Alfalfa &amp; Grass) — $/ton</div>
+               <div class="chart-sub">Purchase price vs. USDA Nebraska Direct Hay Report</div></div>
+          <span class="badge badge-neutral" id="hay-badge">No market data</span>
+        </div>
+        <canvas id="hay-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="table-card" id="txn-card" style="display:none">
+      <div class="table-head-row">Purchase Transactions</div>
+      <div class="filter-row" id="filter-row">
+        <button class="filter-btn active" data-f="all">All</button>
+        <button class="filter-btn" data-f="corn">🌽 Corn</button>
+        <button class="filter-btn" data-f="alfalfa">🌿 Alfalfa</button>
+        <button class="filter-btn" data-f="grass">🌾 Grass</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Product</th><th>Vendor</th><th>Qty</th>
+            <th>Our Price</th><th>Market Benchmark</th><th>vs. Market</th><th>$ Impact</th>
+          </tr></thead>
+          <tbody id="txn-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="empty" id="empty-state">
+      <div class="eicon">📊</div>
+      <p>Upload your Centerpoint Feed &amp; Medicine RM Inventory export above<br>to see purchase prices plotted against USDA market benchmarks.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// Default password: BRI2026
+// To change: replace STORED_HASH with sha256 of new password
+// Generate at: https://emn178.github.io/online-tools/sha256.html
+// ══════════════════════════════════════════════════════
+const STORED_HASH = 'daccdf2f21c1dcfbabba8e83ec0e20f229fb206c9d7a1d2b52748989d70f7126';
+const SESSION_KEY = 'bri_rm_v1';
+
+// ══════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const pw = document.getElementById('pw').value;
+  if (!pw) { document.getElementById('pw-err').textContent = 'Enter password.'; return; }
+  const h = await sha256(pw);
+  if (h === STORED_HASH) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('pw-err').textContent = '';
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadMarketData();
+  } else {
+    document.getElementById('pw-err').textContent = 'Incorrect password.';
+    document.getElementById('pw').value = '';
+  }
+}
+
+function lock() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pw').value = '';
+}
+
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+if (sessionStorage.getItem(SESSION_KEY)) {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadMarketData();
+}
+
+// ══════════════════════════════════════════════════════
+// MARKET DATA
+// market_data.json expected format:
+// {
+//   "corn":        [{"date":"2025-08-12","price":4.50}, ...],
+//   "hay_alfalfa": [{"date":"2025-08-01","price":145.0}, ...],
+//   "hay_grass":   [{"date":"2025-08-01","price":130.0}, ...]
+// }
+// Prices: corn = $/bu, hay = $/ton
+// ══════════════════════════════════════════════════════
+let marketData = null;
+
+async function loadMarketData() {
+  try {
+    const r = await fetch('./market_data.json?' + Date.now());
+    if (!r.ok) throw new Error();
+    marketData = await r.json();
+  } catch {
+    marketData = null;
+  }
+}
+
+function getMarketPrice(key, dateStr) {
+  if (!marketData || !marketData[key]) return null;
+  const pts = marketData[key]
+    .filter(d => d.date <= dateStr)
+    .sort((a,b) => b.date.localeCompare(a.date));
+  return pts.length ? pts[0].price : null;
+}
+
+// ══════════════════════════════════════════════════════
+// FILE UPLOAD
+// ══════════════════════════════════════════════════════
+const dz = document.getElementById('drop-zone');
+const fi = document.getElementById('fi');
+
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0]; if (f) processFile(f);
+});
+fi.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+  document.getElementById('file-info').textContent = 'Parsing ' + file.name + '…';
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null });
+      const txns = parseRows(rows);
+      document.getElementById('file-info').textContent =
+        '✓ ' + file.name + ' — ' + txns.length + ' purchase transactions found';
+      dz.classList.add('loaded');
+      renderAll(txns);
+    } catch(err) {
+      document.getElementById('file-info').textContent = 'Error: ' + err.message;
+    }
+  };
+  r.readAsArrayBuffer(file);
+}
+
+// ══════════════════════════════════════════════════════
+// PARSE
+// ══════════════════════════════════════════════════════
+function toDateStr(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d.toISOString().split('T')[0];
+  if (typeof d === 'string') return d.split('T')[0];
+  // Excel serial number
+  const epoch = new Date(1899, 11, 30);
+  epoch.setDate(epoch.getDate() + Math.floor(d));
+  return epoch.toISOString().split('T')[0];
+}
+
+const SKIP_NOTES = [
+  'beg balance','feed usage','usage/adj','usage/adjustment',
+  'adjust feed inv','ground hay','corn checkoff','shrink feed',
+  'hay ground','med usage','med adj'
+];
+
+function parseRows(rows) {
+  const txns = [];
+  for (const raw of rows) {
+    const row = Array.from({length:16}, (_,i) => raw[i] ?? null);
+    const date = row[3];
+    const product = row[7] ? String(row[7]).trim() : null;
+    const qty = row[8];
+    const pricePerLb = row[10];
+    const amount = row[11];
+    const notes = row[12] ? String(row[12]).trim().toLowerCase() : '';
+    const vendor = row[5] ? String(row[5]).trim() : '';
+
+    if (!date || !product) continue;
+    if (typeof qty !== 'number' || qty <= 0) continue;
+    if (SKIP_NOTES.some(s => notes.includes(s))) continue;
+
+    let type, ourPrice, unit, qtyLabel;
+
+    if (product === 'Cracked Corn') {
+      const m = (row[12] || '').match(/\$\s*([\d.]+)\s*\/\s*bu/i);
+      if (!m) continue;
+      ourPrice = parseFloat(m[1]);
+      unit = '$/bu';
+      type = 'corn';
+      const bu = qty / 56;
+      qtyLabel = bu.toFixed(0) + ' bu (' + (qty/2000).toFixed(1) + ' T)';
+    } else if (product === 'Hay - Alfalfa') {
+      if (!pricePerLb || pricePerLb <= 0) continue;
+      ourPrice = pricePerLb * 2000;
+      unit = '$/ton';
+      type = 'alfalfa';
+      qtyLabel = (qty/2000).toFixed(1) + ' T';
+    } else if (product === 'Hay - Grass') {
+      if (!pricePerLb || pricePerLb <= 0) continue;
+      ourPrice = pricePerLb * 2000;
+      unit = '$/ton';
+      type = 'grass';
+      qtyLabel = (qty/2000).toFixed(1) + ' T';
+    } else {
+      continue;
+    }
+
+    const dateStr = toDateStr(date);
+    if (!dateStr) continue;
+    const mktKey = type === 'corn' ? 'corn' : (type === 'alfalfa' ? 'hay_alfalfa' : 'hay_grass');
+    const mktPrice = getMarketPrice(mktKey, dateStr);
+
+    txns.push({ dateStr, dateObj: new Date(dateStr), product, type,
+                vendor, qty: qtyLabel, ourPrice, mktPrice, unit,
+                amount: amount || 0, rawQty: qty });
+  }
+  return txns.sort((a,b) => a.dateObj - b.dateObj);
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+let cornChart, hayChart;
+let allTxns = [];
+
+function renderAll(txns) {
+  allTxns = txns;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('chart-grid').style.display = '';
+  document.getElementById('txn-card').style.display = '';
+
+  if (!marketData) document.getElementById('mkt-note').style.display = '';
+
+  const corn = txns.filter(t => t.type==='corn');
+  const alfa = txns.filter(t => t.type==='alfalfa');
+  const grass = txns.filter(t => t.type==='grass');
+
+  renderStats(corn, alfa, grass, txns);
+  buildCornChart(corn);
+  buildHayChart(alfa, grass);
+  renderTable(txns, 'all');
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable(allTxns, btn.dataset.f);
+    };
+  });
+}
+
+function avg(arr) { const v=arr.filter(x=>x!=null); return v.length ? v.reduce((s,x)=>s+x,0)/v.length : null; }
+function fmt$(n,d=2) { return n==null?'—':'$'+n.toFixed(d); }
+
+function renderStats(corn, alfa, grass, all) {
+  const sb = document.getElementById('stat-bar');
+  const cornAvg = avg(corn.map(t=>t.ourPrice));
+  const alfaAvg = avg(alfa.map(t=>t.ourPrice));
+  const grassAvg = avg(grass.map(t=>t.ourPrice));
+  const spend = all.reduce((s,t)=>s+Math.abs(t.amount),0);
+
+  const mktRows = all.filter(t=>t.mktPrice);
+  let savings = null;
+  if (mktRows.length) {
+    savings = mktRows.reduce((s,t) => {
+      const tons = t.rawQty / 2000;
+      const bu = t.type==='corn' ? t.rawQty/56 : 0;
+      const qty = t.type==='corn' ? bu : tons;
+      return s + (t.mktPrice - t.ourPrice) * qty;
+    }, 0);
+  }
+
+  sb.innerHTML = [
+    pill('Avg Corn', cornAvg ? fmt$(cornAvg)+'/bu' : '—', ''),
+    pill('Avg Alfalfa', alfaAvg ? fmt$(alfaAvg,0)+'/ton' : '—', ''),
+    pill('Avg Grass', grassAvg ? fmt$(grassAvg,0)+'/ton' : '—', ''),
+    pill('Total Feed Spend', '$'+spend.toLocaleString('en-US',{maximumFractionDigits:0}), ''),
+    savings != null ? pill('vs. Market',
+      (savings>=0?'▼ Saved ':'▲ Over $')+'$'+Math.abs(savings).toLocaleString('en-US',{maximumFractionDigits:0}),
+      savings>=0?'green':'red') : ''
+  ].join('');
+}
+
+function pill(label, val, cls) {
+  return `<div class="stat-pill"><div class="slabel">${label}</div><div class="sval ${cls}">${val}</div></div>`;
+}
+
+function chartOpts(yLabel) {
+  return {
+    responsive:true, maintainAspectRatio:true,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{labels:{color:'#94a3b8',boxWidth:13,font:{size:11}}},
+      tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,
+        titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+        callbacks:{label:c=>' '+c.dataset.label+': $'+c.parsed.y.toFixed(2)}}
+    },
+    scales:{
+      x:{type:'time',time:{unit:'month',displayFormats:{month:"MMM ''yy"}},
+         grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:11}}},
+      y:{grid:{color:'#2a2d3e'},
+         ticks:{color:'#64748b',font:{size:11},callback:v=>'$'+v.toFixed(2)},
+         title:{display:true,text:yLabel,color:'#64748b',font:{size:11}}}
+    }
+  };
+}
+
+function buildCornChart(txns) {
+  if (cornChart) cornChart.destroy();
+  const ctx = document.getElementById('corn-chart').getContext('2d');
+  const bri = txns.map(t=>({x:t.dateStr,y:t.ourPrice}));
+  const mkt = txns.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+  const ds = [{
+    label:'BRI Purchase $/bu', data:bri,
+    borderColor:'#3b82f6', backgroundColor:'#3b82f633',
+    pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2
+  }];
+  if (mkt.length) {
+    ds.push({label:'Alliance Elevator Bid',data:mkt,
+      borderColor:'#94a3b8',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+    updateBadge('corn-badge', bri, mkt, '/bu');
+  }
+  cornChart = new Chart(ctx, {type:'line', data:{datasets:ds}, options:chartOpts('$/bu')});
+}
+
+function buildHayChart(alfa, grass) {
+  if (hayChart) hayChart.destroy();
+  const ctx = document.getElementById('hay-chart').getContext('2d');
+  const ds = [];
+  if (alfa.length) {
+    ds.push({label:'Alfalfa $/ton',data:alfa.map(t=>({x:t.dateStr,y:t.ourPrice})),
+      borderColor:'#10b981',backgroundColor:'#10b98133',
+      pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2});
+    const am = alfa.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+    if (am.length) ds.push({label:'USDA Alfalfa',data:am,
+      borderColor:'#6ee7b7',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+  }
+  if (grass.length) {
+    ds.push({label:'Grass $/ton',data:grass.map(t=>({x:t.dateStr,y:t.ourPrice})),
+      borderColor:'#f59e0b',backgroundColor:'#f59e0b33',
+      pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2});
+    const gm = grass.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+    if (gm.length) ds.push({label:'USDA Grass',data:gm,
+      borderColor:'#fcd34d',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+  }
+  hayChart = new Chart(ctx, {type:'line', data:{datasets:ds}, options:chartOpts('$/ton')});
+  if (alfa.some(t=>t.mktPrice)||grass.some(t=>t.mktPrice)) {
+    const allBRI = [...alfa,...grass].map(t=>t.ourPrice);
+    const allMkt = [...alfa,...grass].filter(t=>t.mktPrice).map(t=>t.mktPrice);
+    updateBadge('hay-badge',allBRI.map(y=>({y})),allMkt.map(y=>({y})),'/ton');
+  }
+}
+
+function updateBadge(id, bri, mkt, unit) {
+  if (!bri.length || !mkt.length) return;
+  const ab = avg(bri.slice(-4).map(p=>p.y||p));
+  const am = avg(mkt.slice(-4).map(p=>p.y||p));
+  const diff = ab - am;
+  const el = document.getElementById(id);
+  if (diff < -0.02) {
+    el.textContent = '▼ $'+Math.abs(diff).toFixed(2)+' below market';
+    el.className = 'badge badge-green';
+  } else if (diff > 0.02) {
+    el.textContent = '▲ $'+Math.abs(diff).toFixed(2)+' above market';
+    el.className = 'badge badge-red';
+  } else {
+    el.textContent = 'At market';
+    el.className = 'badge badge-neutral';
+  }
+}
+
+function renderTable(txns, filter) {
+  const list = filter==='all' ? txns : txns.filter(t=>t.type===filter);
+  const tbody = document.getElementById('txn-body');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No transactions</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(t => {
+    const mktStr = t.mktPrice ? '$'+t.mktPrice.toFixed(2) : '<span class="vs-na">—</span>';
+    let vsDiff='<span class="vs-na">—</span>', impact='<span class="vs-na">—</span>';
+    if (t.mktPrice) {
+      const d = t.ourPrice - t.mktPrice;
+      const cls = d<=0 ? 'vs-below' : 'vs-above';
+      vsDiff = `<span class="${cls}">${d<=0?'▼':'▲'} $${Math.abs(d).toFixed(2)}</span>`;
+      const qty = t.type==='corn' ? t.rawQty/56 : t.rawQty/2000;
+      const imp = -d * qty;
+      impact = `<span class="${imp>=0?'vs-below':'vs-above'}">$${Math.abs(imp).toLocaleString('en-US',{maximumFractionDigits:0})}</span>`;
+    }
+    const icon = t.type==='corn'?'🌽':t.type==='alfalfa'?'🌿':'🌾';
+    return `<tr>
+      <td>${t.dateStr}</td>
+      <td>${icon} ${t.product}</td>
+      <td>${t.vendor||'—'}</td>
+      <td>${t.qty}</td>
+      <td><strong>$${t.ourPrice.toFixed(2)}</strong> <span style="color:var(--muted);font-size:.75rem">${t.unit}</span></td>
+      <td>${mktStr}</td>
+      <td>${vsDiff}</td>
+      <td>${impact}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
