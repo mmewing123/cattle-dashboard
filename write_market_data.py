@@ -32,8 +32,6 @@ session.auth = (API_KEY, "")
 session.headers.update({"Accept": "application/json"})
 
 # ── How far back to pull ──────────────────────────────────────────────────────
-START_DATE = (datetime.today() - timedelta(days=365)).strftime("%m/%d/%Y")
-END_DATE   =  datetime.today().strftime("%m/%d/%Y")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORN  — USDA report 3225: Nebraska Daily Elevator Grain Bids
@@ -46,9 +44,8 @@ ALLIANCE_LOCATIONS = {
 
 def fetch_corn():
     params = {
-        "q":               "commodity=Corn;report_begin_date=" + START_DATE,
-        "report_end_date": END_DATE,
-        "allSections":     "true",
+        "allSections": "true",
+        "lastDays":    365,
     }
     resp = session.get(f"{BASE_URL}/3225", params=params, timeout=60)
     resp.raise_for_status()
@@ -91,6 +88,13 @@ def fetch_corn():
     for date in sorted(by_date):
         avg = sum(by_date[date]) / len(by_date[date])
         result.append({"date": date, "price": round(avg, 4)})
+    if not result:
+        # Debug: print first row keys so we can verify field names
+        sample = rows[:1]
+        print(f"  WARNING: 0 corn rows matched. Total rows from API: {len(rows)}")
+        if sample:
+            print(f"  Sample row keys: {list(sample[0].keys())[:15]}")
+            print(f"  Sample row: { {k:sample[0][k] for k in list(sample[0].keys())[:8]} }")
     print(f"  Corn: {len(result)} daily data points")
     return result
 
@@ -101,9 +105,8 @@ def fetch_corn():
 # ─────────────────────────────────────────────────────────────────────────────
 def fetch_hay():
     params = {
-        "q":               "report_begin_date=" + START_DATE,
-        "report_end_date": END_DATE,
-        "allSections":     "true",
+        "allSections": "true",
+        "lastDays":    365,
     }
     resp = session.get(f"{BASE_URL}/2935", params=params, timeout=60)
     resp.raise_for_status()
@@ -144,6 +147,11 @@ def fetch_hay():
     grass_result = [{"date": d, "price": round(sum(v)/len(v), 2)}
                     for d, v in sorted(grass_by_date.items())]
 
+    if not alfa_result and not grass_result:
+        sample = rows[:1]
+        print(f"  WARNING: 0 hay rows matched. Total rows: {len(rows)}")
+        if sample:
+            print(f"  Sample hay keys: {list(sample[0].keys())[:15]}")
     print(f"  Alfalfa: {len(alfa_result)} data points")
     print(f"  Grass:   {len(grass_result)} data points")
     return alfa_result, grass_result
