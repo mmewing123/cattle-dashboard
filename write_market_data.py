@@ -13,14 +13,19 @@ What it does:
 Requirements: same MARS_API_KEY secret already used by build_dashboard.py
 """
 
-import os, json, requests
+import os, json, requests, argparse
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-API_KEY  = os.environ["MARS_API_KEY"]
+parser = argparse.ArgumentParser()
+parser.add_argument("--api-key", default=os.environ.get("MARS_API_KEY", ""))
+parser.add_argument("--output",  default="docs/market_data.json")
+args = parser.parse_args()
+
+API_KEY  = args.api_key
+OUT_FILE = args.output
 BASE_URL = "https://marsapi.ams.usda.gov/services/v1.2/reports"
-HEADERS  = {"Accept": "application/json", "API_KEY": API_KEY}
-OUT_FILE = "docs/market_data.json"   # adjust path if your HTML lives elsewhere
+HEADERS  = {"Accept": "application/json"}   # key goes in query string, not header
 
 # ── How far back to pull ──────────────────────────────────────────────────────
 START_DATE = (datetime.today() - timedelta(days=365)).strftime("%m/%d/%Y")
@@ -37,9 +42,10 @@ ALLIANCE_LOCATIONS = {
 
 def fetch_corn():
     params = {
-        "q":         "commodity=Corn;report_begin_date=" + START_DATE,
+        "api_key":         API_KEY,
+        "q":               "commodity=Corn;report_begin_date=" + START_DATE,
         "report_end_date": END_DATE,
-        "allSections": "true",
+        "allSections":     "true",
     }
     resp = requests.get(f"{BASE_URL}/3225", headers=HEADERS, params=params, timeout=30)
     resp.raise_for_status()
@@ -74,9 +80,10 @@ def fetch_corn():
 # ─────────────────────────────────────────────────────────────────────────────
 def fetch_hay():
     params = {
-        "q": "report_begin_date=" + START_DATE,
+        "api_key":         API_KEY,
+        "q":               "report_begin_date=" + START_DATE,
         "report_end_date": END_DATE,
-        "allSections": "true",
+        "allSections":     "true",
     }
     resp = requests.get(f"{BASE_URL}/2935", headers=HEADERS, params=params, timeout=30)
     resp.raise_for_status()
