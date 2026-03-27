@@ -144,18 +144,17 @@ def fetch_wdg():
     by_date = defaultdict(list)
     for row in detail_rows:
         commodity = str(row.get("commodity", "")).lower()
+        variety   = str(row.get("variety", "")).lower()
         location  = str(row.get("trade_loc", "")).lower()
         price_str = row.get("price")
         date_raw  = row.get("report_begin_date") or row.get("report_date")
 
-        # Must be Nebraska WDG (wet distillers grain 65-70%)
         if "nebraska" not in location:
             continue
-        if not any(x in commodity for x in ["wet", "wdg"]):
+        if "distillers grain" not in commodity:
             continue
-        if "65" not in commodity and "wet" not in commodity:
+        if "wet" not in variety:          # variety = 'Wet 65-70%'
             continue
-
         if not price_str or not date_raw:
             continue
         try:
@@ -166,16 +165,6 @@ def fetch_wdg():
             continue
 
         by_date[normalize_date(date_raw)].append(price)
-
-    # Debug: print all Nebraska Distillers Grain rows to find wet/dry field
-    ne_dg_rows = [
-        r for r in detail_rows
-        if "nebraska" in str(r.get("trade_loc", "")).lower()
-        and "distillers grain" in str(r.get("commodity", "")).lower()
-    ]
-    print(f"  Nebraska Distillers Grain rows: {len(ne_dg_rows)}")
-    for r in ne_dg_rows[:6]:
-        print(f"    {r}")
 
     result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(by_date.items())]
     print(f"  WDG data points: {len(result)}")
