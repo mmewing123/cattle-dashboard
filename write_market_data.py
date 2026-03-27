@@ -128,31 +128,66 @@ def fetch_wdg():
     resp.raise_for_status()
     raw = resp.json()
 
-    # ── Deep-dive the raw structure to find price data ──────────────────────
-    # Top level keys
-    print(f"  Top-level keys: {list(raw.keys()) if isinstance(raw, dict) else 'list of ' + str(len(raw))}")
+    sections = raw if isinstance(raw, list) else raw.get("results", [])
 
-    results = raw.get("results", []) if isinstance(raw, dict) else raw
-    print(f"  Top-level results count: {len(results)}")
+    # Find the Report Detail section — that's where prices live
+    detail_rows = []
+    for section in sections:
+        if isinstance(section, dict):
+            sec_name = str(section.get("reportSection", "")).lower()
+            if "detail" in sec_name:
+                detail_rows = section.get("results", [])
+                print(f"  Found '{section['reportSection']}' with {len(detail_rows)} rows")
+                if detail_rows:
+                    print(f"  Detail row keys: {list(detail_rows[0].keys())}")
+                    for k, v in list(detail_rows[0].items()):
+                        print(f"    {k}: {str(v)[:120]}")
+                break
 
-    if results:
-        first = results[0]
-        print(f"  First result keys: {list(first.keys()) if isinstance(first, dict) else type(first)}")
-        # Print ALL keys and their values for first result
-        if isinstance(first, dict):
-            for k, v in list(first.items())[:20]:
-                print(f"    {k}: {str(v)[:120]}")
+    if not detail_rows:
+        print("  WARNING: Report Detail section not found — printing all section names:")
+        for s in sections:
+            if isinstance(s, dict):
+                print(f"    Section: {s.get('reportSection')} rows: {len(s.get('results', []))}")
+        return []
 
-        # Check if there are nested results inside
-        if isinstance(first, dict) and "results" in first:
-            inner = first["results"]
-            print(f"  Inner results count: {len(inner)}")
-            if inner:
-                print(f"  Inner row keys: {list(inner[0].keys())}")
-                for k, v in list(inner[0].items())[:20]:
-                    print(f"    {k}: {str(v)[:120]}")
+    # Now parse — we'll fix field names after seeing the output
+    by_date = defaultdict(list)
+    for row in detail_rows:
+        # Try all plausible location/region field names
+        location = str(row.get("location", row.get("Location",
+                    row.get("region", row.get("Region",
+                    row.get("state", row.get("State", ""))))))).lower()
+        if "nebraska" not in location and location.strip() not in ("ne", "nebraska"):
+            continue
 
-    return []   # return empty until we know the structure
+        # Try all plausible commodity/product field names
+        commodity = str(row.get("commodity", row.get("Commodity",
+                     row.get("product", row.get("Product",
+                     row.get("item", row.get("Item", ""))))))).lower()
+        if not any(x in commodity for x in ["wet", "wdg", "65", "w65"]):
+            continue
+
+        price_str = (row.get("price") or row.get("Price") or
+                     row.get("avg_price") or row.get("wtd_Avg_Price") or
+                     row.get("value") or row.get("Value"))
+        date_raw  = (row.get("report_date") or row.get("Report_Date") or
+                     row.get("report_begin_date") or row.get("week_ending"))
+
+        if not price_str or not date_raw:
+            continue
+        try:
+            price = float(price_str)
+            if price < 5:
+                continue
+        except (ValueError, TypeError):
+            continue
+
+        by_date[normalize_date(date_raw)].append(price)
+
+    result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(by_date.items())]
+    print(f"  WDG data points: {len(result)}")
+    return result
 
 
 # ─────────────────────────────────────────────────────────────────────────────
