@@ -2170,7 +2170,6 @@ function psRenderClassTable(buys, sells, classes) {
       <th ${thStyle('avgSell','color:var(--accent2)')}>Avg Sell/hd${sortIcon('avgSell')}</th>
       <th ${thStyle('spread')}>Spread/hd${sortIcon('spread')}</th>
       <th ${thStyle('deaths','color:#f97316')}>Deaths${sortIcon('deaths')}</th>
-      <th ${thStyle('deathPct','color:#f97316')}>Death %${sortIcon('deathPct')}</th>
     </tr></thead>
     <tbody>
     ${rows.map(r => {
@@ -2186,7 +2185,6 @@ function psRenderClassTable(buys, sells, classes) {
         <td class="num" style="text-align:right">${r.avgSell != null ? '$'+Math.round(r.avgSell).toLocaleString() : '—'}</td>
         <td class="num" style="text-align:right;color:${spreadColor};font-weight:600">${spreadStr}</td>
         <td class="num" style="text-align:right;color:#f97316">${r.deaths > 0 ? r.deaths.toLocaleString() : '—'}</td>
-        <td class="num" style="text-align:right;color:#f97316">${r.deathPct != null ? r.deathPct.toFixed(1)+'%' : '—'}</td>
       </tr>`;
     }).join('')}
     </tbody>
