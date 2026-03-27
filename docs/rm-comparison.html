@@ -162,6 +162,14 @@
         </div>
         <canvas id="hay-chart"></canvas>
       </div>
+      <div class="chart-card" style="grid-column:1/-1">
+        <div class="chart-head">
+          <div><div class="chart-title">WDG (Wet Distillers Grains 65-70%) — $/ton</div>
+               <div class="chart-sub">BRI delivered price vs. USDA Nebraska FOB plant (3618) — freight not included in benchmark</div></div>
+          <span class="badge badge-neutral" id="wdg-badge">No market data</span>
+        </div>
+        <canvas id="wdg-chart" style="max-height:260px"></canvas>
+      </div>
     </div>
 
     <div class="table-card" id="txn-card" style="display:none">
@@ -177,6 +185,7 @@
         <button class="filter-btn" data-f="corn">🌽 Corn</button>
         <button class="filter-btn" data-f="alfalfa">🌿 Alfalfa</button>
         <button class="filter-btn" data-f="grass">🌾 Grass</button>
+        <button class="filter-btn" data-f="wdg">🌾 WDG</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -280,7 +289,10 @@ async function loadSharedTransactions() {
       ...t,
       dateObj: new Date(t.dateStr),
       mktPrice: getMarketPrice(
-        t.type === 'corn' ? 'corn' : t.type === 'alfalfa' ? 'hay_alfalfa' : 'hay_grass',
+        t.type === 'corn' ? 'corn'
+        : t.type === 'alfalfa' ? 'hay_alfalfa'
+        : t.type === 'grass' ? 'hay_grass'
+        : 'wdg',
         t.dateStr
       ),
     }));
@@ -392,13 +404,24 @@ function parseRows(rows) {
       unit = '$/ton';
       type = 'grass';
       qtyLabel = (qty/2000).toFixed(1) + ' T';
+    } else if (product === 'WDG') {
+      // Skip tonnage tax rows (zero or missing price) and trucking rows
+      if (!pricePerLb || pricePerLb <= 0) continue;
+      if (notes.includes('trucking') || notes.includes('tonnage tax')) continue;
+      ourPrice = pricePerLb * 2000;
+      unit = '$/ton';
+      type = 'wdg';
+      qtyLabel = (qty/2000).toFixed(1) + ' T';
     } else {
       continue;
     }
 
     const dateStr = toDateStr(date);
     if (!dateStr) continue;
-    const mktKey = type === 'corn' ? 'corn' : (type === 'alfalfa' ? 'hay_alfalfa' : 'hay_grass');
+    const mktKey = type === 'corn' ? 'corn'
+                 : type === 'alfalfa' ? 'hay_alfalfa'
+                 : type === 'grass'   ? 'hay_grass'
+                 : 'wdg';
     const mktPrice = getMarketPrice(mktKey, dateStr);
 
     txns.push({ dateStr, dateObj: new Date(dateStr), product, type,
@@ -411,7 +434,7 @@ function parseRows(rows) {
 // ══════════════════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════════════════
-let cornChart, hayChart;
+let cornChart, hayChart, wdgChart;
 let allTxns = [];
 
 function renderAll(txns) {
@@ -422,13 +445,15 @@ function renderAll(txns) {
 
   if (!marketData) document.getElementById('mkt-note').style.display = '';
 
-  const corn = txns.filter(t => t.type==='corn');
-  const alfa = txns.filter(t => t.type==='alfalfa');
+  const corn  = txns.filter(t => t.type==='corn');
+  const alfa  = txns.filter(t => t.type==='alfalfa');
   const grass = txns.filter(t => t.type==='grass');
+  const wdg   = txns.filter(t => t.type==='wdg');
 
-  renderStats(corn, alfa, grass, txns);
+  renderStats(corn, alfa, grass, wdg, txns);
   buildCornChart(corn);
   buildHayChart(alfa, grass);
+  buildWdgChart(wdg);
   renderTable(txns, 'all');
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -443,11 +468,12 @@ function renderAll(txns) {
 function avg(arr) { const v=arr.filter(x=>x!=null); return v.length ? v.reduce((s,x)=>s+x,0)/v.length : null; }
 function fmt$(n,d=2) { return n==null?'—':'$'+n.toFixed(d); }
 
-function renderStats(corn, alfa, grass, all) {
+function renderStats(corn, alfa, grass, wdg, all) {
   const sb = document.getElementById('stat-bar');
-  const cornAvg = avg(corn.map(t=>t.ourPrice));
-  const alfaAvg = avg(alfa.map(t=>t.ourPrice));
+  const cornAvg  = avg(corn.map(t=>t.ourPrice));
+  const alfaAvg  = avg(alfa.map(t=>t.ourPrice));
   const grassAvg = avg(grass.map(t=>t.ourPrice));
+  const wdgAvg   = avg(wdg.map(t=>t.ourPrice));
   const spend = all.reduce((s,t)=>s+Math.abs(t.amount),0);
 
   const mktRows = all.filter(t=>t.mktPrice);
@@ -462,12 +488,13 @@ function renderStats(corn, alfa, grass, all) {
   }
 
   sb.innerHTML = [
-    pill('Avg Corn', cornAvg ? fmt$(cornAvg)+'/bu' : '—', ''),
-    pill('Avg Alfalfa', alfaAvg ? fmt$(alfaAvg,0)+'/ton' : '—', ''),
-    pill('Avg Grass', grassAvg ? fmt$(grassAvg,0)+'/ton' : '—', ''),
+    pill('Avg Corn',    cornAvg  ? fmt$(cornAvg)+'/bu'   : '—', ''),
+    pill('Avg Alfalfa', alfaAvg  ? fmt$(alfaAvg,0)+'/ton': '—', ''),
+    pill('Avg Grass',   grassAvg ? fmt$(grassAvg,0)+'/ton':'—', ''),
+    pill('Avg WDG',     wdgAvg   ? fmt$(wdgAvg,0)+'/ton' : '—', ''),
     pill('Total Feed Spend', '$'+spend.toLocaleString('en-US',{maximumFractionDigits:0}), ''),
     savings != null ? pill('vs. Market',
-      (savings>=0?'▼ Saved ':'▲ Over $')+'$'+Math.abs(savings).toLocaleString('en-US',{maximumFractionDigits:0}),
+      (savings>=0?'▼ Saved ':'▲ Over ')+'$'+Math.abs(savings).toLocaleString('en-US',{maximumFractionDigits:0}),
       savings>=0?'green':'red') : ''
   ].join('');
 }
@@ -552,6 +579,26 @@ function buildHayChart(alfa, grass) {
     const allMkt = [...alfa,...grass].filter(t=>t.mktPrice).map(t=>t.mktPrice);
     updateBadge('hay-badge',allBRI.map(y=>({y})),allMkt.map(y=>({y})),'/ton');
   }
+}
+
+function buildWdgChart(txns) {
+  if (wdgChart) wdgChart.destroy();
+  if (!txns.length) return;
+  const ctx = document.getElementById('wdg-chart').getContext('2d');
+  const bri = txns.map(t=>({x:t.dateStr,y:t.ourPrice}));
+  const mkt = txns.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+  const ds = [{
+    label:'BRI Delivered $/ton', data:bri,
+    borderColor:'#a78bfa', backgroundColor:'#a78bfa33',
+    pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2
+  }];
+  if (mkt.length) {
+    ds.push({label:'USDA NE FOB Plant $/ton',data:mkt,
+      borderColor:'#94a3b8',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+    updateBadge('wdg-badge', bri, mkt, '/ton');
+  }
+  wdgChart = new Chart(ctx, {type:'line', data:{datasets:ds}, options:chartOpts('$/ton')});
 }
 
 function updateBadge(id, bri, mkt, unit) {
