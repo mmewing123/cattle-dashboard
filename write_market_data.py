@@ -1,7 +1,7 @@
 """
 write_market_data.py
 ────────────────────
-Pulls USDA MARS corn and hay prices and writes docs/market_data.json
+Pulls USDA MARS corn, hay, and WDG prices and writes docs/market_data.json
 for the rm-comparison.html dashboard.
 """
 
@@ -58,7 +58,6 @@ def fetch_corn():
     rows = unpack_rows(resp.json())
     print(f"  Total rows: {len(rows)}")
 
-    # Filter to Corn rows only
     corn_rows = [r for r in rows if "corn" in str(r.get("commodity", r.get("Commodity", ""))).lower()]
     print(f"  Corn rows: {len(corn_rows)}")
 
@@ -84,7 +83,7 @@ def fetch_corn():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HAY — report 2935: Nebraska Direct Hay Report, dates normalized to YYYY-MM-DD
+# HAY — report 2935: Nebraska Direct Hay Report
 # ─────────────────────────────────────────────────────────────────────────────
 def fetch_hay():
     print("  Fetching report 2935 (hay)...")
@@ -126,6 +125,62 @@ def fetch_hay():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# WDG — report 3618: National Weekly Grain Co-Products Report
+# Filters to Nebraska, Distillers Grain Wet 65-70%, $/ton FOB plant
+# ─────────────────────────────────────────────────────────────────────────────
+def fetch_wdg():
+    print("  Fetching report 3618 (WDG)...")
+    resp = session.get(f"{BASE_URL}/3618", params={"allSections": "true", "lastDays": 365}, timeout=60)
+    resp.raise_for_status()
+    rows = unpack_rows(resp.json())
+    print(f"  Total rows: {len(rows)}")
+
+    if not rows:
+        print("  WARNING: no rows returned from 3618")
+        return []
+
+    # Debug first row so we can verify field names
+    print(f"  Sample keys: {list(rows[0].keys())[:15]}")
+    print(f"  Sample values: { {k: rows[0][k] for k in list(rows[0].keys())[:10]} }")
+
+    by_date = defaultdict(list)
+    for row in rows:
+        # Commodity/product type — look for WDG / Wet 65-70%
+        commodity = str(row.get("commodity", row.get("Commodity",
+                     row.get("product", row.get("Product", ""))))).lower()
+        if not any(x in commodity for x in ["wet", "wdg", "65-70", "65_70"]):
+            continue
+
+        # Location — Nebraska only
+        location = str(row.get("location", row.get("Location",
+                    row.get("region", row.get("Region", ""))))).lower()
+        if "nebraska" not in location and "ne" not in location.split():
+            continue
+
+        # Price — $/ton
+        price_str = (row.get("price") or row.get("Price") or
+                     row.get("avg_price") or row.get("wtd_Avg_Price") or
+                     row.get("weighted_avg") or row.get("Weighted_Avg"))
+        date_raw  = (row.get("report_date") or row.get("Report_Date") or
+                     row.get("report_begin_date") or row.get("week_ending_date"))
+
+        if not price_str or not date_raw:
+            continue
+        try:
+            price = float(price_str)
+            if price < 5:   # skip obviously bad data
+                continue
+        except (ValueError, TypeError):
+            continue
+
+        by_date[normalize_date(date_raw)].append(price)
+
+    result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(by_date.items())]
+    print(f"  WDG data points: {len(result)}")
+    return result
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
@@ -135,11 +190,15 @@ def main():
     print("\nFetching hay data...")
     alfa, grass = fetch_hay()
 
+    print("\nFetching WDG data...")
+    wdg = fetch_wdg()
+
     market = {
         "generated":   datetime.today().strftime("%Y-%m-%d %H:%M"),
         "corn":        corn,
         "hay_alfalfa": alfa,
         "hay_grass":   grass,
+        "wdg":         wdg,
     }
 
     os.makedirs(os.path.dirname(OUT_FILE) or ".", exist_ok=True)
@@ -150,6 +209,7 @@ def main():
     print(f"  Corn pts:    {len(corn)}")
     print(f"  Alfalfa pts: {len(alfa)}")
     print(f"  Grass pts:   {len(grass)}")
+    print(f"  WDG pts:     {len(wdg)}")
 
 
 if __name__ == "__main__":
