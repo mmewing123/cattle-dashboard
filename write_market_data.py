@@ -130,49 +130,31 @@ def fetch_wdg():
 
     sections = raw if isinstance(raw, list) else raw.get("results", [])
 
-    # Find the Report Detail section — that's where prices live
     detail_rows = []
     for section in sections:
-        if isinstance(section, dict):
-            sec_name = str(section.get("reportSection", "")).lower()
-            if "detail" in sec_name:
-                detail_rows = section.get("results", [])
-                print(f"  Found '{section['reportSection']}' with {len(detail_rows)} rows")
-                if detail_rows:
-                    print(f"  Detail row keys: {list(detail_rows[0].keys())}")
-                    for k, v in list(detail_rows[0].items()):
-                        print(f"    {k}: {str(v)[:120]}")
-                break
+        if isinstance(section, dict) and "detail" in str(section.get("reportSection", "")).lower():
+            detail_rows = section.get("results", [])
+            print(f"  Report Detail: {len(detail_rows)} rows")
+            break
 
     if not detail_rows:
-        print("  WARNING: Report Detail section not found — printing all section names:")
-        for s in sections:
-            if isinstance(s, dict):
-                print(f"    Section: {s.get('reportSection')} rows: {len(s.get('results', []))}")
+        print("  WARNING: Report Detail section not found")
         return []
 
-    # Now parse — we'll fix field names after seeing the output
     by_date = defaultdict(list)
     for row in detail_rows:
-        # Try all plausible location/region field names
-        location = str(row.get("location", row.get("Location",
-                    row.get("region", row.get("Region",
-                    row.get("state", row.get("State", ""))))))).lower()
-        if "nebraska" not in location and location.strip() not in ("ne", "nebraska"):
-            continue
+        commodity = str(row.get("commodity", "")).lower()
+        location  = str(row.get("trade_loc", "")).lower()
+        price_str = row.get("price")
+        date_raw  = row.get("report_begin_date") or row.get("report_date")
 
-        # Try all plausible commodity/product field names
-        commodity = str(row.get("commodity", row.get("Commodity",
-                     row.get("product", row.get("Product",
-                     row.get("item", row.get("Item", ""))))))).lower()
-        if not any(x in commodity for x in ["wet", "wdg", "65", "w65"]):
+        # Must be Nebraska WDG (wet distillers grain 65-70%)
+        if "nebraska" not in location:
             continue
-
-        price_str = (row.get("price") or row.get("Price") or
-                     row.get("avg_price") or row.get("wtd_Avg_Price") or
-                     row.get("value") or row.get("Value"))
-        date_raw  = (row.get("report_date") or row.get("Report_Date") or
-                     row.get("report_begin_date") or row.get("week_ending"))
+        if not any(x in commodity for x in ["wet", "wdg"]):
+            continue
+        if "65" not in commodity and "wet" not in commodity:
+            continue
 
         if not price_str or not date_raw:
             continue
@@ -184,6 +166,14 @@ def fetch_wdg():
             continue
 
         by_date[normalize_date(date_raw)].append(price)
+
+    # Debug: print unique Nebraska commodities found to confirm matching
+    ne_commodities = set(
+        str(r.get("commodity", ""))
+        for r in detail_rows
+        if "nebraska" in str(r.get("trade_loc", "")).lower()
+    )
+    print(f"  Nebraska commodities found: {ne_commodities}")
 
     result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(by_date.items())]
     print(f"  WDG data points: {len(result)}")
