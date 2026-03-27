@@ -188,6 +188,30 @@ tr:hover td{background:rgba(59,130,246,.03);}
   .inv-upload-zone.loaded .upload-title,
   .inv-upload-zone.loaded .upload-sub{display:none;}
   .inv-file-info{margin-top:6px;font-size:.83rem;color:var(--accent2);font-weight:500;}
+
+  /* PURCHASES & SALES TAB */
+  .ps-upload-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+  @media(max-width:900px){.ps-upload-row{grid-template-columns:1fr;}}
+  .ps-upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;
+    cursor:pointer;background:var(--surface);transition:all .2s;}
+  .ps-upload-zone.drag-over{border-color:var(--accent);background:rgba(59,130,246,.05);}
+  .ps-upload-zone.loaded{border-color:var(--accent2);border-style:solid;padding:14px 28px;}
+  .ps-upload-zone.loaded .upload-icon,.ps-upload-zone.loaded .upload-title,.ps-upload-zone.loaded .upload-sub{display:none;}
+  .ps-info{margin-top:6px;font-size:.82rem;color:var(--accent2);font-weight:500;}
+  .ps-upload-zone.buy-zone{border-color:rgba(239,68,68,.3);}
+  .ps-upload-zone.buy-zone.loaded{border-color:var(--danger);}
+  .ps-upload-zone.sell-zone{border-color:rgba(16,185,129,.3);}
+  .ps-upload-zone.sell-zone.loaded{border-color:var(--accent2);}
+  .conc-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+  @media(max-width:900px){.conc-grid{grid-template-columns:1fr;}}
+  .sval.red{color:var(--danger);}
+  .ps-upload-zone.inv-zone{border-color:rgba(139,92,246,.3);}
+  .ps-upload-zone.inv-zone.loaded{border-color:#8b5cf6;}
+  .class-chart-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .class-filter-btn{background:none;border:1px solid;padding:4px 12px;border-radius:999px;
+    cursor:pointer;font-size:.74rem;font-weight:600;transition:all .15s;}
+
+
 </style>
 </head>
 <body>
@@ -211,6 +235,7 @@ tr:hover td{background:rgba(59,130,246,.03);}
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="rm">📈 RM Cost vs. Market</button>
       <button class="tab-btn" data-tab="inventory">🐄 Cattle Inventory</button>
+      <button class="tab-btn" data-tab="ps">💰 Purchases &amp; Sales</button>
     </div>
     <button class="lock-btn" onclick="lock()">🔒 Lock</button>
   </div>
@@ -374,6 +399,116 @@ tr:hover td{background:rgba(59,130,246,.03);}
     </div>
   </div>
 
+
+  <!-- PURCHASES & SALES TAB -->
+  <div class="tab-pane" id="tab-ps">
+    <div class="content">
+
+      <!-- Dual upload -->
+      <div class="ps-upload-row">
+        <div class="ps-upload-zone buy-zone" id="ps-purchase-drop" onclick="document.getElementById('ps-purchase-fi').click()">
+          <div class="upload-icon">📥</div>
+          <div class="upload-title">Drop Purchases by Vendor Export</div>
+          <div class="upload-sub">Centerpoint → Reports → Purchases by Vendor</div>
+          <div class="ps-info" id="ps-purchase-info"></div>
+          <input type="file" id="ps-purchase-fi" accept=".xlsx,.xls" onclick="event.stopPropagation()">
+        </div>
+        <div class="ps-upload-zone sell-zone" id="ps-sale-drop" onclick="document.getElementById('ps-sale-fi').click()">
+          <div class="upload-icon">📤</div>
+          <div class="upload-title">Drop Sales by Customer Export</div>
+          <div class="upload-sub">Centerpoint → Reports → Sales by Customer</div>
+          <div class="ps-info" id="ps-sale-info"></div>
+          <input type="file" id="ps-sale-fi" accept=".xlsx,.xls" onclick="event.stopPropagation()">
+        </div>
+        <div class="ps-upload-zone inv-zone" id="ps-inv-drop" onclick="document.getElementById('ps-inv-fi').click()">
+          <div class="upload-icon">🐄</div>
+          <div class="upload-title">Drop Cattle Inventory Export</div>
+          <div class="upload-sub">Required to link class to purchases &amp; sales</div>
+          <div class="ps-info" id="ps-inv-info"></div>
+          <input type="file" id="ps-inv-fi" accept=".xlsx,.xls" onclick="event.stopPropagation()">
+        </div>
+      </div>
+
+      <div id="ps-dashboard" style="display:none">
+
+        <!-- Stats -->
+        <div class="stat-bar" id="ps-stat-bar"></div>
+
+        <!-- Monthly activity chart -->
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Monthly Purchase &amp; Sale Activity</div>
+              <div class="chart-sub">$ volume (bars) and head count (dashed lines) by month</div>
+            </div>
+            <button onclick="psSaveShared()" style="background:var(--accent2);border:none;color:#fff;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600">💾 Save for Sharing</button>
+          </div>
+          <canvas id="ps-month-chart" style="max-height:320px"></canvas>
+        </div>
+
+        <!-- $/head trend chart -->
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Avg $/Head Trend — Purchases vs Sales</div>
+              <div class="chart-sub">Monthly average cost per head purchased and price per head sold</div>
+            </div>
+          </div>
+          <canvas id="ps-price-chart" style="max-height:280px"></canvas>
+        </div>
+
+        <!-- Concentration tables -->
+        <div class="conc-grid">
+          <div class="table-card">
+            <div class="table-head-row" style="background:rgba(239,68,68,.06)">
+              <span>Top Vendors by Purchase $</span>
+            </div>
+            <div class="table-wrap" id="ps-vendor-table"></div>
+          </div>
+          <div class="table-card">
+            <div class="table-head-row" style="background:rgba(16,185,129,.06)">
+              <span>Top Customers by Sale $</span>
+            </div>
+            <div class="table-wrap" id="ps-cust-table"></div>
+          </div>
+        </div>
+
+        <!-- Head flow by year -->
+        <div class="table-card" style="margin-bottom:28px">
+          <div class="table-head-row">Head &amp; Dollar Flow by Year</div>
+          <div class="table-wrap" id="ps-flow-table"></div>
+        </div>
+
+        <!-- Class Analysis Section -->
+        <div id="ps-class-section" style="display:none">
+
+          <div class="chart-card" style="margin-bottom:24px">
+            <div class="chart-head">
+              <div>
+                <div class="chart-title">Buy vs Sell — Head Volume by Class</div>
+                <div class="chart-sub">Total head purchased (red) and sold (green) per class</div>
+              </div>
+            </div>
+            <canvas id="ps-class-vol-chart" style="max-height:300px"></canvas>
+          </div>
+
+          <div class="table-card" style="margin-bottom:24px">
+            <div class="table-head-row">Buy / Sell Comparison by Class</div>
+            <div class="table-wrap" id="ps-class-table"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="empty" id="ps-empty">
+        <div class="eicon">💰</div>
+        <p>Upload your Purchases by Vendor and Sales by Customer exports above<br>to see activity, $/head trends, and counterparty concentration.</p>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -422,6 +557,7 @@ if (sessionStorage.getItem(SESSION_KEY)) {
 function onLogin() {
   loadMarketData();   // RM tab — loads market_data.json then tries rm_transactions.json
   invTryLoadShared(); // Inventory tab — tries cattle_inventory.json
+  psTryLoadShared();   // PS tab — tries purchases_sales.json
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────────────
@@ -433,6 +569,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     // Resize charts when switching to a tab (Chart.js needs this)
     if (btn.dataset.tab === 'inventory' && invMainChart) invMainChart.resize();
+    if (btn.dataset.tab === 'ps') { if(psMonthChart) psMonthChart.resize(); if(psPriceChart) psPriceChart.resize(); if(psClassVolChart) psClassVolChart.resize(); }
     if (btn.dataset.tab === 'rm') {
       if (cornChart) cornChart.resize();
       if (hayChart) hayChart.resize();
@@ -1428,6 +1565,638 @@ async function invTryLoadShared() {
   } catch { /* no shared file — wait for upload */ }
 }
 invTryLoadShared();
+
+// ══════════════════════════════════════════════════════
+// PURCHASES & SALES TAB
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// PURCHASES & SALES TAB
+// ══════════════════════════════════════════════════════
+
+let psAllPurchases = [];
+let psAllSales = [];
+let psMonthChart = null;
+let psPriceChart = null;
+let psActiveTab = 'both'; // both | purchases | sales
+let psSortCol = 0, psSortAsc = false, psSortType = 'vendor';
+
+// ── UPLOAD HANDLERS ───────────────────────────────────────────────────────────
+const psPurchaseDz = document.getElementById('ps-purchase-drop');
+const psPurchaseFi = document.getElementById('ps-purchase-fi');
+const psSaleDz     = document.getElementById('ps-sale-drop');
+const psSaleFi     = document.getElementById('ps-sale-fi');
+
+psPurchaseDz.addEventListener('dragover', e => { e.preventDefault(); psPurchaseDz.classList.add('drag-over'); });
+psPurchaseDz.addEventListener('dragleave', () => psPurchaseDz.classList.remove('drag-over'));
+psPurchaseDz.addEventListener('drop', e => { e.preventDefault(); psPurchaseDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) psParsePurchases(f); });
+psPurchaseFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) psParsePurchases(e.target.files[0]); });
+
+psSaleDz.addEventListener('dragover', e => { e.preventDefault(); psSaleDz.classList.add('drag-over'); });
+psSaleDz.addEventListener('dragleave', () => psSaleDz.classList.remove('drag-over'));
+psSaleDz.addEventListener('drop', e => { e.preventDefault(); psSaleDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) psParseSales(f); });
+psSaleFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) psParseSales(e.target.files[0]); });
+
+function psParsePurchases(file) {
+  document.getElementById('ps-purchase-info').textContent = 'Parsing ' + file.name + '…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null });
+      psAllPurchases = psParsePurchaseRows(rows);
+      document.getElementById('ps-purchase-info').textContent = '✓ ' + file.name + ' — ' + psAllPurchases.length + ' transactions';
+      psPurchaseDz.classList.add('loaded');
+      if (psAllPurchases.length) psRenderAll();
+    } catch(err) { document.getElementById('ps-purchase-info').textContent = 'Error: ' + err.message; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function psParseSales(file) {
+  document.getElementById('ps-sale-info').textContent = 'Parsing ' + file.name + '…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null });
+      psAllSales = psParseSaleRows(rows);
+      document.getElementById('ps-sale-info').textContent = '✓ ' + file.name + ' — ' + psAllSales.length + ' transactions';
+      psSaleDz.classList.add('loaded');
+      if (psAllSales.length) psRenderAll();
+    } catch(err) { document.getElementById('ps-sale-info').textContent = 'Error: ' + err.message; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── PARSE ─────────────────────────────────────────────────────────────────────
+function psToDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (typeof d === 'string') return new Date(d);
+  if (typeof d === 'number') { const e = new Date(1899,11,30); e.setDate(e.getDate()+Math.floor(d)); return e; }
+  return null;
+}
+
+function psParsePurchaseRows(rows) {
+  const txns = [];
+  let vendor = null;
+  for (const raw of rows) {
+    const r = Array.from({length:14}, (_,i) => raw[i] ?? null);
+    // Section header: vendor name in col 0, no date in col 1
+    if (r[0] && typeof r[0]==='string' && r[0].trim() && !r[1]) {
+      const v = r[0].trim();
+      if (!v.includes('Total') && !v.includes('Black Ranches') && !v.includes('Page') &&
+          !v.includes('PM') && !v.includes('Purchases by') && !v.match(/^\d/)) {
+        vendor = v.split('  ')[0].trim(); // strip the short code after double-space
+      }
+      continue;
+    }
+    const date = psToDate(r[1]);
+    if (!date || !vendor) continue;
+    const qty = r[8], amount = r[11], unitCost = r[10];
+    if (typeof qty !== 'number' || qty <= 0) continue;
+    txns.push({
+      date, dateStr: date.toISOString().split('T')[0],
+      month: date.toISOString().slice(0,7),
+      vendor, acctName: r[6] ? String(r[6]).trim() : '',
+      notation: r[7] ? String(r[7]).trim() : '',
+      txn: String(r[3] || '').trim(),
+      qty, amount: amount || 0,
+      unitCost: unitCost || (amount && qty ? amount/qty : 0),
+    });
+  }
+  return txns.sort((a,b) => a.date - b.date);
+}
+
+function psParseSaleRows(rows) {
+  const txns = [];
+  let customer = null;
+  for (const raw of rows) {
+    const r = Array.from({length:11}, (_,i) => raw[i] ?? null);
+    if (r[0] && typeof r[0]==='string' && r[0].trim() && !r[2]) {
+      const v = r[0].trim();
+      if (!v.includes('Total') && !v.includes('Black Ranches') && !v.includes('Page') &&
+          !v.includes('PM') && !v.includes('Sales by') && !v.includes('400') && !v.match(/^\d/)) {
+        customer = v.split('  ')[0].trim();
+      }
+      continue;
+    }
+    const date = psToDate(r[2]);
+    if (!date || !customer) continue;
+    const qty = r[6], amount = r[8];
+    if (typeof qty !== 'number' || qty <= 0) continue;
+    txns.push({
+      date, dateStr: date.toISOString().split('T')[0],
+      month: date.toISOString().slice(0,7),
+      customer,
+      txn: String(r[4] || '').trim(),
+      notation: r[5] ? String(r[5]).trim() : '',
+      qty, amount: amount || 0,
+      unitPrice: (amount && qty) ? amount/qty : 0,
+    });
+  }
+  return txns.sort((a,b) => a.date - b.date);
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function psRenderAll() {
+  const hasBoth = psAllPurchases.length && psAllSales.length;
+  document.getElementById('ps-dashboard').style.display = 'block';
+  document.getElementById('ps-empty').style.display = psAllPurchases.length || psAllSales.length ? 'none' : 'block';
+  psRenderStats();
+  psRenderMonthChart();
+  psRenderPriceChart();
+  psRenderConcentrationTables();
+  psRenderHeadFlow();
+  psRenderClassAnalysis(); // will no-op if inv not loaded yet
+}
+
+function psFmt$(n) { return '$' + Math.round(n).toLocaleString(); }
+function psFmtK(n) { return n >= 1000000 ? '$' + (n/1000000).toFixed(1)+'M' : '$' + Math.round(n/1000)+'K'; }
+
+function psRenderStats() {
+  const sb = document.getElementById('ps-stat-bar');
+  const totalBought = psAllPurchases.reduce((s,t)=>s+t.amount,0);
+  const headBought  = psAllPurchases.reduce((s,t)=>s+t.qty,0);
+  const totalSold   = psAllSales.reduce((s,t)=>s+t.amount,0);
+  const headSold    = psAllSales.reduce((s,t)=>s+t.qty,0);
+  const avgBuy  = headBought > 0 ? totalBought/headBought : 0;
+  const avgSell = headSold > 0 ? totalSold/headSold : 0;
+
+  sb.innerHTML = [
+    psPill('Total Purchased', psFmtK(totalBought), 'red'),
+    psPill('Head Bought', headBought.toLocaleString(), ''),
+    psPill('Avg Cost/Hd', psFmt$(avgBuy), ''),
+    psPill('Total Sold', psFmtK(totalSold), 'green'),
+    psPill('Head Sold', headSold.toLocaleString(), ''),
+    psPill('Avg Price/Hd', psFmt$(avgSell), ''),
+  ].join('');
+}
+function psPill(l,v,c){ return `<div class="stat-pill"><div class="slabel">${l}</div><div class="sval ${c}">${v}</div></div>`; }
+
+// ── MONTHLY ACTIVITY CHART ────────────────────────────────────────────────────
+function psRenderMonthChart() {
+  // Build month-keyed data
+  const months = new Set([
+    ...psAllPurchases.map(t=>t.month),
+    ...psAllSales.map(t=>t.month)
+  ]);
+  const sortedMonths = [...months].sort();
+
+  const buyAmt  = sortedMonths.map(m => psAllPurchases.filter(t=>t.month===m).reduce((s,t)=>s+t.amount,0));
+  const sellAmt = sortedMonths.map(m => psAllSales.filter(t=>t.month===m).reduce((s,t)=>s+t.amount,0));
+  const buyHd   = sortedMonths.map(m => psAllPurchases.filter(t=>t.month===m).reduce((s,t)=>s+t.qty,0));
+  const sellHd  = sortedMonths.map(m => psAllSales.filter(t=>t.month===m).reduce((s,t)=>s+t.qty,0));
+
+  const labels = sortedMonths.map(m => { const [y,mo] = m.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1] + " '" + y.slice(2); });
+
+  if (psMonthChart) psMonthChart.destroy();
+  const ctx = document.getElementById('ps-month-chart').getContext('2d');
+  psMonthChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Purchases $', data: buyAmt, backgroundColor: '#ef444466', borderColor: '#ef4444', borderWidth:1, borderRadius:3, yAxisID:'y' },
+        { label: 'Sales $',     data: sellAmt, backgroundColor: '#10b98166', borderColor: '#10b981', borderWidth:1, borderRadius:3, yAxisID:'y' },
+        { label: 'Head Bought', data: buyHd,  type:'line', borderColor:'#fca5a5', borderWidth:1.5, borderDash:[4,3], pointRadius:0, tension:.3, yAxisID:'y2', fill:false },
+        { label: 'Head Sold',   data: sellHd, type:'line', borderColor:'#6ee7b7', borderWidth:1.5, borderDash:[4,3], pointRadius:0, tension:.3, yAxisID:'y2', fill:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',boxWidth:12,font:{size:10}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c => c.datasetIndex < 2 ? ' '+c.dataset.label+': $'+Math.round(c.parsed.y).toLocaleString() : ' '+c.dataset.label+': '+c.parsed.y.toLocaleString()+' hd'}}
+      },
+      scales:{
+        x:{ grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},maxRotation:35} },
+        y:{ position:'left', grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},callback:v=>v>=1000000?'$'+(v/1000000).toFixed(1)+'M':'$'+Math.round(v/1000)+'K'} },
+        y2:{ position:'right', grid:{display:false}, ticks:{color:'#64748b',font:{size:10},callback:v=>v.toLocaleString()+' hd'} }
+      }
+    }
+  });
+}
+
+// ── $/HEAD TREND CHART ────────────────────────────────────────────────────────
+function psRenderPriceChart() {
+  // Monthly avg $/hd for purchases and sales
+  const months = [...new Set([...psAllPurchases.map(t=>t.month),...psAllSales.map(t=>t.month)])].sort();
+
+  const buyPrice = months.map(m => {
+    const txns = psAllPurchases.filter(t=>t.month===m && t.qty>0);
+    const totAmt = txns.reduce((s,t)=>s+t.amount,0);
+    const totHd  = txns.reduce((s,t)=>s+t.qty,0);
+    return totHd > 0 ? totAmt/totHd : null;
+  });
+  const sellPrice = months.map(m => {
+    const txns = psAllSales.filter(t=>t.month===m && t.qty>0);
+    const totAmt = txns.reduce((s,t)=>s+t.amount,0);
+    const totHd  = txns.reduce((s,t)=>s+t.qty,0);
+    return totHd > 0 ? totAmt/totHd : null;
+  });
+
+  const labels = months.map(m => { const [y,mo] = m.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1]+" '"+y.slice(2); });
+
+  if (psPriceChart) psPriceChart.destroy();
+  const ctx = document.getElementById('ps-price-chart').getContext('2d');
+  psPriceChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'Avg Purchase $/hd', data:buyPrice, borderColor:'#ef4444', backgroundColor:'#ef444420', pointRadius:4, tension:.3, fill:false, borderWidth:2, spanGaps:true },
+      { label:'Avg Sale $/hd',     data:sellPrice, borderColor:'#10b981', backgroundColor:'#10b98120', pointRadius:4, tension:.3, fill:false, borderWidth:2, spanGaps:true },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',boxWidth:12,font:{size:10}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>c.parsed.y != null ? ' '+c.dataset.label+': $'+Math.round(c.parsed.y).toLocaleString()+'/hd' : ''}}
+      },
+      scales:{
+        x:{ grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},maxRotation:35} },
+        y:{ grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+Math.round(v).toLocaleString()} }
+      }
+    }
+  });
+}
+
+// ── CONCENTRATION TABLES ──────────────────────────────────────────────────────
+function psRenderConcentrationTables() {
+  // Vendors
+  const vendorMap = {};
+  psAllPurchases.forEach(t => {
+    if (!vendorMap[t.vendor]) vendorMap[t.vendor] = {name:t.vendor,amt:0,head:0,txns:0};
+    vendorMap[t.vendor].amt += t.amount;
+    vendorMap[t.vendor].head += t.qty;
+    vendorMap[t.vendor].txns++;
+  });
+  const vendors = Object.values(vendorMap).sort((a,b)=>b.amt-a.amt);
+  const totalBuyAmt = vendors.reduce((s,v)=>s+v.amt,0);
+
+  // Customers
+  const custMap = {};
+  psAllSales.forEach(t => {
+    if (!custMap[t.customer]) custMap[t.customer] = {name:t.customer,amt:0,head:0,txns:0};
+    custMap[t.customer].amt += t.amount;
+    custMap[t.customer].head += t.qty;
+    custMap[t.customer].txns++;
+  });
+  const custs = Object.values(custMap).sort((a,b)=>b.amt-a.amt);
+  const totalSellAmt = custs.reduce((s,c)=>s+c.amt,0);
+
+  const vendorHtml = psConcentrationTable(vendors, totalBuyAmt, 'vendor', '#ef4444');
+  const custHtml   = psConcentrationTable(custs, totalSellAmt, 'customer', '#10b981');
+
+  document.getElementById('ps-vendor-table').innerHTML = vendorHtml;
+  document.getElementById('ps-cust-table').innerHTML   = custHtml;
+}
+
+function psConcentrationTable(rows, total, type, color) {
+  const top = rows.slice(0, 15);
+  return `<table>
+    <thead><tr>
+      <th>${type === 'vendor' ? 'Vendor' : 'Customer'}</th>
+      <th style="text-align:right">Amount</th>
+      <th style="text-align:right">Head</th>
+      <th style="text-align:right">Avg $/hd</th>
+      <th>Share</th>
+    </tr></thead>
+    <tbody>
+    ${top.map(r => {
+      const pct = total > 0 ? r.amt/total : 0;
+      const avg = r.head > 0 ? r.amt/r.head : 0;
+      const barW = Math.round(pct*120);
+      return `<tr>
+        <td>${r.name}</td>
+        <td class="num" style="text-align:right">${psFmtK(r.amt)}</td>
+        <td class="num" style="text-align:right">${Math.round(r.head).toLocaleString()}</td>
+        <td class="num" style="text-align:right">$${Math.round(avg).toLocaleString()}</td>
+        <td><div class="bar-cell"><div class="mini-bar" style="width:${barW}px;background:${color}"></div><span class="num" style="color:var(--muted);font-size:.76rem">${(pct*100).toFixed(1)}%</span></div></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ── HEAD FLOW BY YEAR ─────────────────────────────────────────────────────────
+function psRenderHeadFlow() {
+  const years = [...new Set([
+    ...psAllPurchases.map(t=>t.date.getFullYear()),
+    ...psAllSales.map(t=>t.date.getFullYear())
+  ])].sort();
+
+  let html = `<table>
+    <thead><tr>
+      <th>Year</th>
+      <th style="text-align:right">Head Bought</th>
+      <th style="text-align:right">$ Purchased</th>
+      <th style="text-align:right">Avg Buy $/hd</th>
+      <th style="text-align:right">Head Sold</th>
+      <th style="text-align:right">$ Sold</th>
+      <th style="text-align:right">Avg Sell $/hd</th>
+    </tr></thead><tbody>`;
+
+  years.forEach(yr => {
+    const buys  = psAllPurchases.filter(t=>t.date.getFullYear()===yr);
+    const sells = psAllSales.filter(t=>t.date.getFullYear()===yr);
+    const bAmt = buys.reduce((s,t)=>s+t.amount,0);
+    const sAmt = sells.reduce((s,t)=>s+t.amount,0);
+    const bHd  = buys.reduce((s,t)=>s+t.qty,0);
+    const sHd  = sells.reduce((s,t)=>s+t.qty,0);
+    html += `<tr>
+      <td><strong>${yr}</strong></td>
+      <td class="num" style="text-align:right;color:var(--danger)">${Math.round(bHd).toLocaleString()}</td>
+      <td class="num" style="text-align:right;color:var(--danger)">${psFmtK(bAmt)}</td>
+      <td class="num" style="text-align:right">$${Math.round(bHd>0?bAmt/bHd:0).toLocaleString()}</td>
+      <td class="num" style="text-align:right;color:var(--accent2)">${Math.round(sHd).toLocaleString()}</td>
+      <td class="num" style="text-align:right;color:var(--accent2)">${psFmtK(sAmt)}</td>
+      <td class="num" style="text-align:right">$${Math.round(sHd>0?sAmt/sHd:0).toLocaleString()}</td>
+    </tr>`;
+  });
+
+  // Totals row
+  const totBHd  = psAllPurchases.reduce((s,t)=>s+t.qty,0);
+  const totBAmt = psAllPurchases.reduce((s,t)=>s+t.amount,0);
+  const totSHd  = psAllSales.reduce((s,t)=>s+t.qty,0);
+  const totSAmt = psAllSales.reduce((s,t)=>s+t.amount,0);
+  html += `<tr style="border-top:2px solid var(--border);font-weight:600">
+    <td>Total</td>
+    <td class="num" style="text-align:right;color:var(--danger)">${Math.round(totBHd).toLocaleString()}</td>
+    <td class="num" style="text-align:right;color:var(--danger)">${psFmtK(totBAmt)}</td>
+    <td class="num" style="text-align:right">$${Math.round(totBHd>0?totBAmt/totBHd:0).toLocaleString()}</td>
+    <td class="num" style="text-align:right;color:var(--accent2)">${Math.round(totSHd).toLocaleString()}</td>
+    <td class="num" style="text-align:right;color:var(--accent2)">${psFmtK(totSAmt)}</td>
+    <td class="num" style="text-align:right">$${Math.round(totSHd>0?totSAmt/totSHd:0).toLocaleString()}</td>
+  </tr>`;
+
+  html += '</tbody></table>';
+  document.getElementById('ps-flow-table').innerHTML = html;
+}
+
+// ── SAVE / LOAD SHARED ────────────────────────────────────────────────────────
+function psSaveShared() {
+  if (!psAllPurchases.length && !psAllSales.length) {
+    alert('No data loaded yet.'); return;
+  }
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Purchases & Sales',
+    purchases: psAllPurchases.map(t => ({...t, date: t.dateStr})),
+    sales: psAllSales.map(t => ({...t, date: t.dateStr})),
+    invTxnMap: Object.keys(psInvTxnMap).length ? psInvTxnMap : undefined,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'purchases_sales.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setTimeout(() => alert('purchases_sales.json downloaded.\n\nUpload to docs/ in GitHub to enable auto-load for executives.'), 300);
+}
+
+async function psTryLoadShared() {
+  try {
+    const r = await fetch('./purchases_sales.json?' + Date.now());
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data.purchases) {
+      psAllPurchases = data.purchases.map(t => ({...t, date:new Date(t.date), dateStr:t.date, month:t.date.slice(0,7)}));
+    }
+    if (data.sales) {
+      psAllSales = data.sales.map(t => ({...t, date:new Date(t.date), dateStr:t.date, month:t.date.slice(0,7)}));
+    }
+    // If shared data includes pre-joined class info, reconstruct inv txn map
+    if (data.invTxnMap) {
+      psInvTxnMap = data.invTxnMap;
+      document.getElementById('ps-inv-info').textContent = '✓ Class data loaded from shared file';
+      document.getElementById('ps-inv-drop').classList.add('loaded');
+    }
+    document.getElementById('ps-purchase-info').textContent = '✓ Shared data loaded (' + data.generated + ')';
+    document.getElementById('ps-sale-info').textContent = '✓ Shared data loaded';
+    document.getElementById('ps-purchase-drop').classList.add('loaded');
+    document.getElementById('ps-sale-drop').classList.add('loaded');
+    psRenderAll();
+  } catch { /* no shared file */ }
+}
+
+
+// ══════════════════════════════════════════════════════
+// PS TAB — CLASS ANALYSIS (inventory join)
+// ══════════════════════════════════════════════════════
+
+let psInvTxnMap = {};          // txn# → [{class, qty}]
+let psDeathsByClass = {};      // class → death head count
+let psClassVolChart   = null;
+
+// ── INV UPLOAD HANDLER ────────────────────────────────
+const psInvDz = document.getElementById('ps-inv-drop');
+const psInvFi = document.getElementById('ps-inv-fi');
+psInvDz.addEventListener('dragover', e => { e.preventDefault(); psInvDz.classList.add('drag-over'); });
+psInvDz.addEventListener('dragleave', () => psInvDz.classList.remove('drag-over'));
+psInvDz.addEventListener('drop', e => { e.preventDefault(); psInvDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) psParseInventory(f); });
+psInvFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) psParseInventory(e.target.files[0]); });
+
+function psParseInventory(file) {
+  document.getElementById('ps-inv-info').textContent = 'Parsing ' + file.name + '…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null });
+      psInvTxnMap = psBuildInvTxnMap(rows);
+      const txnCount = Object.keys(psInvTxnMap).length;
+      document.getElementById('ps-inv-info').textContent = '✓ ' + file.name + ' — ' + txnCount + ' txn keys loaded';
+      psInvDz.classList.add('loaded');
+      psRenderClassAnalysis();
+    } catch(err) { document.getElementById('ps-inv-info').textContent = 'Error: ' + err.message; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function psBuildInvTxnMap(rows) {
+  const map = {};
+  const deaths = {};
+  const SKIP = ['fmv adj'];
+  const DEATH_NOTE = ['death','died','dead','doa','euthan','mortal'];
+  let inSkip = false;
+  for (const raw of rows) {
+    const r = Array.from({length:15}, (_,i) => raw[i] ?? null);
+    if (r[1] && typeof r[1]==='string' && r[1].trim() && !r[2]) {
+      inSkip = SKIP.some(s => r[1].trim().toLowerCase().includes(s));
+      continue;
+    }
+    if (inSkip) continue;
+    const txn  = r[4] ? String(r[4]).trim() : null;
+    const qty  = r[6];
+    const cls  = r[9] ? String(r[9]).trim() : null;
+    const note = r[13] ? String(r[13]).toLowerCase() : '';
+    if (!cls || cls === 'Profit Center' || typeof qty !== 'number') continue;
+    // Death detection
+    const txnLower = (txn || '').toLowerCase();
+    if (qty < 0 && (DEATH_NOTE.some(k => note.includes(k)) || txnLower === 'death')) {
+      deaths[cls] = (deaths[cls] || 0) + Math.abs(qty);
+    }
+    // Txn map (for joins)
+    if (!txn) continue;
+    if (!map[txn]) map[txn] = [];
+    map[txn].push({ class:cls, qty });
+  }
+  psDeathsByClass = deaths;
+  return map;
+}
+
+// ── JOIN: attach class to each purchase/sale txn ─────
+function psEnrich(txns, isSale) {
+  return txns.map(t => {
+    let cls = null;
+    const matches = psInvTxnMap[t.txn || ''] || [];
+    if (matches.length === 1) {
+      cls = matches[0].class;
+    } else if (matches.length > 1) {
+      // For sales, inventory qty is negative; for purchases positive
+      const relevant = isSale
+        ? matches.filter(m => m.qty < 0)
+        : matches.filter(m => m.qty > 0);
+      const pool = relevant.length ? relevant : matches;
+      const best = pool.reduce((a,b) => Math.abs(Math.abs(b.qty)-t.qty) < Math.abs(Math.abs(a.qty)-t.qty) ? b : a);
+      cls = best.class;
+    }
+    return { ...t, class: cls };
+  });
+}
+
+// ── RENDER CLASS ANALYSIS ─────────────────────────────
+function psRenderClassAnalysis() {
+  if (!Object.keys(psInvTxnMap).length) return;
+  if (!psAllPurchases.length && !psAllSales.length) return;
+
+  document.getElementById('ps-class-section').style.display = 'block';
+
+  const enrichedBuys  = psEnrich(psAllPurchases, false).filter(t => t.class);
+  const enrichedSells = psEnrich(psAllSales, true).filter(t => t.class);
+
+  const allClasses = [...new Set([...enrichedBuys.map(t=>t.class), ...enrichedSells.map(t=>t.class)])].sort();
+  psRenderClassVolChart(enrichedBuys, enrichedSells, allClasses);
+  psRenderClassTable(enrichedBuys, enrichedSells, allClasses);
+}
+
+// ── CLASS VOL CHART ───────────────────────────────────
+function psRenderClassVolChart(buys, sells, classes) {
+  // Sort classes by total head bought desc
+  const sorted = [...classes].sort((a,b) => {
+    const bH = buys.filter(t=>t.class===b).reduce((s,t)=>s+t.qty,0);
+    const aH = buys.filter(t=>t.class===a).reduce((s,t)=>s+t.qty,0);
+    return bH - aH;
+  });
+
+  const buyHd  = sorted.map(c => buys.filter(t=>t.class===c).reduce((s,t)=>s+t.qty,0));
+  const sellHd = sorted.map(c => sells.filter(t=>t.class===c).reduce((s,t)=>s+t.qty,0));
+
+  if (psClassVolChart) psClassVolChart.destroy();
+  const ctx = document.getElementById('ps-class-vol-chart').getContext('2d');
+  psClassVolChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:sorted, datasets:[
+      { label:'Head Bought', data:buyHd,  backgroundColor:'#ef444466', borderColor:'#ef4444', borderWidth:1, borderRadius:3 },
+      { label:'Head Sold',   data:sellHd, backgroundColor:'#10b98166', borderColor:'#10b981', borderWidth:1, borderRadius:3 },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',boxWidth:12,font:{size:10}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>' '+c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString()+' hd'}}
+      },
+      scales:{
+        x:{grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},maxRotation:35}},
+        y:{grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},callback:v=>v.toLocaleString()}}
+      }
+    }
+  });
+}
+
+// ── CLASS TABLE ───────────────────────────────────────
+let psClassSortCol = 'bAmt', psClassSortAsc = false;
+
+function psClassTableSort(col) {
+  if (psClassSortCol === col) psClassSortAsc = !psClassSortAsc;
+  else { psClassSortCol = col; psClassSortAsc = false; }
+  // Re-render using cached enriched data
+  const eb = psEnrich(psAllPurchases, false).filter(t=>t.class);
+  const es = psEnrich(psAllSales, true).filter(t=>t.class);
+  const allCls = [...new Set([...eb.map(t=>t.class),...es.map(t=>t.class)])].sort();
+  psRenderClassTable(eb, es, allCls);
+}
+
+function psRenderClassTable(buys, sells, classes) {
+  const totalBuyAmt  = buys.reduce((s,t)=>s+t.amount,0);
+  const totalSellAmt = sells.reduce((s,t)=>s+t.amount,0);
+
+  const rows = classes.map(cls => {
+    const b = buys.filter(t=>t.class===cls);
+    const s = sells.filter(t=>t.class===cls);
+    const bAmt = b.reduce((sum,t)=>sum+t.amount,0);
+    const sAmt = s.reduce((sum,t)=>sum+t.amount,0);
+    const bHd  = b.reduce((sum,t)=>sum+t.qty,0);
+    const sHd  = s.reduce((sum,t)=>sum+t.qty,0);
+    const avgBuy  = bHd > 0 ? bAmt/bHd : null;
+    const avgSell = sHd > 0 ? sAmt/sHd : null;
+    const spread  = avgBuy && avgSell ? avgSell - avgBuy : null;
+    const deaths  = psDeathsByClass[cls] || 0;
+    const deathPct = bHd > 0 ? (deaths / bHd) * 100 : null;
+    return { cls, bAmt, sAmt, bHd, sHd, avgBuy, avgSell, spread, deaths, deathPct };
+  }).sort((a,b) => {
+    const av = a[psClassSortCol] ?? -Infinity;
+    const bv = b[psClassSortCol] ?? -Infinity;
+    const cmp = typeof av === 'string' ? av.localeCompare(bv) : av - bv;
+    return psClassSortAsc ? cmp : -cmp;
+  });
+
+  const sortIcon = col => col === psClassSortCol ? (psClassSortAsc ? ' ▲' : ' ▼') : ' ↕';
+  const thStyle = (col, extra='') => `style="text-align:right;cursor:pointer;user-select:none;${extra}" onclick="psClassTableSort('${col}')"`;
+  const html = `<table>
+    <thead><tr>
+      <th style="cursor:pointer;user-select:none" onclick="psClassTableSort('cls')">Class${sortIcon('cls')}</th>
+      <th ${thStyle('bAmt','color:var(--danger)')}>Buy $${sortIcon('bAmt')}</th>
+      <th ${thStyle('bHd','color:var(--danger)')}>Hd Bought${sortIcon('bHd')}</th>
+      <th ${thStyle('avgBuy','color:var(--danger)')}>Avg Buy/hd${sortIcon('avgBuy')}</th>
+      <th ${thStyle('sAmt','color:var(--accent2)')}>Sell $${sortIcon('sAmt')}</th>
+      <th ${thStyle('sHd','color:var(--accent2)')}>Hd Sold${sortIcon('sHd')}</th>
+      <th ${thStyle('avgSell','color:var(--accent2)')}>Avg Sell/hd${sortIcon('avgSell')}</th>
+      <th ${thStyle('spread')}>Spread/hd${sortIcon('spread')}</th>
+      <th ${thStyle('deaths','color:#f97316')}>Deaths${sortIcon('deaths')}</th>
+      <th ${thStyle('deathPct','color:#f97316')}>Death %${sortIcon('deathPct')}</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r => {
+      const spreadColor = r.spread > 0 ? 'var(--accent2)' : r.spread < 0 ? 'var(--danger)' : 'var(--muted)';
+      const spreadStr = r.spread != null ? (r.spread > 0 ? '+' : '') + '$' + Math.round(r.spread).toLocaleString() : '—';
+      return `<tr>
+        <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${classColor(r.cls)};margin-right:7px"></span>${r.cls}</td>
+        <td class="num" style="text-align:right;color:var(--danger)">${psFmtK(r.bAmt)}</td>
+        <td class="num" style="text-align:right">${r.bHd > 0 ? Math.round(r.bHd).toLocaleString() : '—'}</td>
+        <td class="num" style="text-align:right">${r.avgBuy != null ? '$'+Math.round(r.avgBuy).toLocaleString() : '—'}</td>
+        <td class="num" style="text-align:right;color:var(--accent2)">${r.sAmt > 0 ? psFmtK(r.sAmt) : '—'}</td>
+        <td class="num" style="text-align:right">${r.sHd > 0 ? Math.round(r.sHd).toLocaleString() : '—'}</td>
+        <td class="num" style="text-align:right">${r.avgSell != null ? '$'+Math.round(r.avgSell).toLocaleString() : '—'}</td>
+        <td class="num" style="text-align:right;color:${spreadColor};font-weight:600">${spreadStr}</td>
+        <td class="num" style="text-align:right;color:#f97316">${r.deaths > 0 ? r.deaths.toLocaleString() : '—'}</td>
+        <td class="num" style="text-align:right;color:#f97316">${r.deathPct != null ? r.deathPct.toFixed(1)+'%' : '—'}</td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+
+  document.getElementById('ps-class-table').innerHTML = html;
+}
+
+
+
 </script>
 </body>
 </html>
