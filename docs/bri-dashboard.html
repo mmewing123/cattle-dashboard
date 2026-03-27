@@ -915,8 +915,8 @@ const invDz = document.getElementById('inv-drop-zone');
 const invFi = document.getElementById('inv-fi');
 invDz.addEventListener('dragover', e => { e.preventDefault(); invDz.classList.add('drag-over'); });
 invDz.addEventListener('dragleave', () => invDz.classList.remove('drag-over'));
-invDz.addEventListener('drop', e => { e.preventDefault(); invDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) processFile(f); });
-invFi.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
+invDz.addEventListener('drop', e => { e.preventDefault(); invDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) invProcessFile(f); });
+invFi.addEventListener('change', e => { if(e.target.files[0]) invProcessFile(e.target.files[0]); });
 
 function invProcessFile(file) {
   document.getElementById('inv-file-info').textContent = 'Parsing ' + file.name + '…';
