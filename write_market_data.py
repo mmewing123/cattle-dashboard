@@ -61,11 +61,6 @@ def fetch_corn():
     corn_rows = [r for r in rows if "corn" in str(r.get("commodity", r.get("Commodity", ""))).lower()]
     print(f"  Corn rows: {len(corn_rows)}")
 
-    if not corn_rows and rows:
-        sample = rows[0]
-        print(f"  Sample keys: {list(sample.keys())[:15]}")
-        print(f"  Sample values: { {k: sample[k] for k in list(sample.keys())[:8]} }")
-
     by_date = defaultdict(list)
     for row in corn_rows:
         price = row.get("avg_price") or row.get("Avg_Price") or row.get("price")
@@ -126,58 +121,38 @@ def fetch_hay():
 
 # ─────────────────────────────────────────────────────────────────────────────
 # WDG — report 3618: National Weekly Grain Co-Products Report
-# Filters to Nebraska, Distillers Grain Wet 65-70%, $/ton FOB plant
 # ─────────────────────────────────────────────────────────────────────────────
 def fetch_wdg():
     print("  Fetching report 3618 (WDG)...")
     resp = session.get(f"{BASE_URL}/3618", params={"allSections": "true", "lastDays": 365}, timeout=60)
     resp.raise_for_status()
-    rows = unpack_rows(resp.json())
-    print(f"  Total rows: {len(rows)}")
+    raw = resp.json()
 
-    if not rows:
-        print("  WARNING: no rows returned from 3618")
-        return []
+    # ── Deep-dive the raw structure to find price data ──────────────────────
+    # Top level keys
+    print(f"  Top-level keys: {list(raw.keys()) if isinstance(raw, dict) else 'list of ' + str(len(raw))}")
 
-    # Debug first row so we can verify field names
-    print(f"  Sample keys: {list(rows[0].keys())[:15]}")
-    print(f"  Sample values: { {k: rows[0][k] for k in list(rows[0].keys())[:10]} }")
+    results = raw.get("results", []) if isinstance(raw, dict) else raw
+    print(f"  Top-level results count: {len(results)}")
 
-    by_date = defaultdict(list)
-    for row in rows:
-        # Commodity/product type — look for WDG / Wet 65-70%
-        commodity = str(row.get("commodity", row.get("Commodity",
-                     row.get("product", row.get("Product", ""))))).lower()
-        if not any(x in commodity for x in ["wet", "wdg", "65-70", "65_70"]):
-            continue
+    if results:
+        first = results[0]
+        print(f"  First result keys: {list(first.keys()) if isinstance(first, dict) else type(first)}")
+        # Print ALL keys and their values for first result
+        if isinstance(first, dict):
+            for k, v in list(first.items())[:20]:
+                print(f"    {k}: {str(v)[:120]}")
 
-        # Location — Nebraska only
-        location = str(row.get("location", row.get("Location",
-                    row.get("region", row.get("Region", ""))))).lower()
-        if "nebraska" not in location and "ne" not in location.split():
-            continue
+        # Check if there are nested results inside
+        if isinstance(first, dict) and "results" in first:
+            inner = first["results"]
+            print(f"  Inner results count: {len(inner)}")
+            if inner:
+                print(f"  Inner row keys: {list(inner[0].keys())}")
+                for k, v in list(inner[0].items())[:20]:
+                    print(f"    {k}: {str(v)[:120]}")
 
-        # Price — $/ton
-        price_str = (row.get("price") or row.get("Price") or
-                     row.get("avg_price") or row.get("wtd_Avg_Price") or
-                     row.get("weighted_avg") or row.get("Weighted_Avg"))
-        date_raw  = (row.get("report_date") or row.get("Report_Date") or
-                     row.get("report_begin_date") or row.get("week_ending_date"))
-
-        if not price_str or not date_raw:
-            continue
-        try:
-            price = float(price_str)
-            if price < 5:   # skip obviously bad data
-                continue
-        except (ValueError, TypeError):
-            continue
-
-        by_date[normalize_date(date_raw)].append(price)
-
-    result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(by_date.items())]
-    print(f"  WDG data points: {len(result)}")
-    return result
+    return []   # return empty until we know the structure
 
 
 # ─────────────────────────────────────────────────────────────────────────────
