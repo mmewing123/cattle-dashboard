@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-26",
+  "generated": "2026-03-27",
   "source": "Centerpoint Feed & Medicine RM Inventory",
   "transactions": [
     {
@@ -69,6 +69,28 @@
       "rawQty": 62140
     },
     {
+      "dateStr": "2025-08-12",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "83.2 T",
+      "ourPrice": 52.585116614570815,
+      "unit": "$/ton",
+      "amount": 4374.03,
+      "rawQty": 166360
+    },
+    {
+      "dateStr": "2025-08-19",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "84.9 T",
+      "ourPrice": 51.53496585825289,
+      "unit": "$/ton",
+      "amount": 4377.38,
+      "rawQty": 169880
+    },
+    {
       "dateStr": "2025-08-23",
       "product": "Hay - Alfalfa",
       "type": "alfalfa",
@@ -78,6 +100,17 @@
       "unit": "$/ton",
       "amount": 22041.6,
       "rawQty": 314880
+    },
+    {
+      "dateStr": "2025-08-26",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "85.1 T",
+      "ourPrice": 50.94503171247357,
+      "unit": "$/ton",
+      "amount": 4337.46,
+      "rawQty": 170280
     },
     {
       "dateStr": "2025-08-31",
@@ -245,6 +278,17 @@
       "rawQty": 59960
     },
     {
+      "dateStr": "2025-08-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "56.6 T",
+      "ourPrice": 51.64515558698727,
+      "unit": "$/ton",
+      "amount": 2921.05,
+      "rawQty": 113120
+    },
+    {
       "dateStr": "2025-09-05",
       "product": "Cracked Corn",
       "type": "corn",
@@ -256,6 +300,17 @@
       "rawQty": 228390
     },
     {
+      "dateStr": "2025-09-09",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "85.1 T",
+      "ourPrice": 52.23504524620989,
+      "unit": "$/ton",
+      "amount": 4444.68,
+      "rawQty": 170180
+    },
+    {
       "dateStr": "2025-09-11",
       "product": "Hay - Alfalfa",
       "type": "alfalfa",
@@ -265,6 +320,171 @@
       "unit": "$/ton",
       "amount": 17188.8,
       "rawQty": 286480
+    },
+    {
+      "dateStr": "2025-09-14",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Broussard Trucking",
+      "qty": "28.4 T",
+      "ourPrice": 61.94992947813822,
+      "unit": "$/ton",
+      "amount": 1756.9,
+      "rawQty": 56720
+    },
+    {
+      "dateStr": "2025-09-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.6 T",
+      "ourPrice": 52.879859894921196,
+      "unit": "$/ton",
+      "amount": 1509.72,
+      "rawQty": 57100
+    },
+    {
+      "dateStr": "2025-09-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 52.87992957746479,
+      "unit": "$/ton",
+      "amount": 1501.79,
+      "rawQty": 56800
+    },
+    {
+      "dateStr": "2025-09-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 52.87985611510791,
+      "unit": "$/ton",
+      "amount": 1470.06,
+      "rawQty": 55600
+    },
+    {
+      "dateStr": "2025-09-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.5 T",
+      "ourPrice": 53.69992716678806,
+      "unit": "$/ton",
+      "amount": 1474.6,
+      "rawQty": 54920
+    },
+    {
+      "dateStr": "2025-09-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 53.700036010082826,
+      "unit": "$/ton",
+      "amount": 1491.25,
+      "rawQty": 55540
+    },
+    {
+      "dateStr": "2025-09-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 53.69989395546129,
+      "unit": "$/ton",
+      "amount": 1519.17,
+      "rawQty": 56580
+    },
+    {
+      "dateStr": "2025-09-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 53.459830866807614,
+      "unit": "$/ton",
+      "amount": 1517.19,
+      "rawQty": 56760
+    },
+    {
+      "dateStr": "2025-09-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.1 T",
+      "ourPrice": 53.459843638948115,
+      "unit": "$/ton",
+      "amount": 1504.36,
+      "rawQty": 56280
+    },
+    {
+      "dateStr": "2025-09-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.6 T",
+      "ourPrice": 55.70018148820326,
+      "unit": "$/ton",
+      "amount": 1534.54,
+      "rawQty": 55100
+    },
+    {
+      "dateStr": "2025-10-05",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Broussard Trucking",
+      "qty": "28.6 T",
+      "ourPrice": 71.88006993006992,
+      "unit": "$/ton",
+      "amount": 2055.77,
+      "rawQty": 57200
+    },
+    {
+      "dateStr": "2025-10-07",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.7 T",
+      "ourPrice": 62.62284231244883,
+      "unit": "$/ton",
+      "amount": 1797.62,
+      "rawQty": 57411
+    },
+    {
+      "dateStr": "2025-10-12",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Broussard Trucking",
+      "qty": "28.9 T",
+      "ourPrice": 71.21003460207614,
+      "unit": "$/ton",
+      "amount": 2057.97,
+      "rawQty": 57800
+    },
+    {
+      "dateStr": "2025-10-14",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 62.140084685956246,
+      "unit": "$/ton",
+      "amount": 1761.05,
+      "rawQty": 56680
+    },
+    {
+      "dateStr": "2025-10-14",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.1 T",
+      "ourPrice": 62.14016364283173,
+      "unit": "$/ton",
+      "amount": 1746.76,
+      "rawQty": 56220
     },
     {
       "dateStr": "2025-10-15",
@@ -399,6 +619,94 @@
       "rawQty": 137600
     },
     {
+      "dateStr": "2025-10-19",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Broussard Trucking",
+      "qty": "29.0 T",
+      "ourPrice": 69.23010678608337,
+      "unit": "$/ton",
+      "amount": 2009.75,
+      "rawQty": 58060
+    },
+    {
+      "dateStr": "2025-10-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.6 T",
+      "ourPrice": 60.159957997899895,
+      "unit": "$/ton",
+      "amount": 1718.77,
+      "rawQty": 57140
+    },
+    {
+      "dateStr": "2025-10-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 60.16008462623413,
+      "unit": "$/ton",
+      "amount": 1706.14,
+      "rawQty": 56720
+    },
+    {
+      "dateStr": "2025-10-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.4 T",
+      "ourPrice": 60.16002723867892,
+      "unit": "$/ton",
+      "amount": 1766.9,
+      "rawQty": 58740
+    },
+    {
+      "dateStr": "2025-10-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.0 T",
+      "ourPrice": 57.89989644459786,
+      "unit": "$/ton",
+      "amount": 1677.36,
+      "rawQty": 57940
+    },
+    {
+      "dateStr": "2025-10-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 57.90014114326041,
+      "unit": "$/ton",
+      "amount": 1640.89,
+      "rawQty": 56680
+    },
+    {
+      "dateStr": "2025-10-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.4 T",
+      "ourPrice": 67.89989785495403,
+      "unit": "$/ton",
+      "amount": 1994.22,
+      "rawQty": 58740
+    },
+    {
+      "dateStr": "2025-10-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 67.8999295278365,
+      "unit": "$/ton",
+      "amount": 1927,
+      "rawQty": 56760
+    },
+    {
       "dateStr": "2025-10-31",
       "product": "Cracked Corn",
       "type": "corn",
@@ -421,6 +729,72 @@
       "rawQty": 344940
     },
     {
+      "dateStr": "2025-10-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 58.1701376632545,
+      "unit": "$/ton",
+      "amount": 1647.96,
+      "rawQty": 56660
+    },
+    {
+      "dateStr": "2025-10-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.3 T",
+      "ourPrice": 58.16985645933014,
+      "unit": "$/ton",
+      "amount": 1702.05,
+      "rawQty": 58520
+    },
+    {
+      "dateStr": "2025-10-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 68.17007042253522,
+      "unit": "$/ton",
+      "amount": 1936.03,
+      "rawQty": 56800
+    },
+    {
+      "dateStr": "2025-11-11",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.5 T",
+      "ourPrice": 56.44994910078045,
+      "unit": "$/ton",
+      "amount": 1663.58,
+      "rawQty": 58940
+    },
+    {
+      "dateStr": "2025-11-11",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.6 T",
+      "ourPrice": 56.45008756567425,
+      "unit": "$/ton",
+      "amount": 1611.65,
+      "rawQty": 57100
+    },
+    {
+      "dateStr": "2025-11-11",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.5 T",
+      "ourPrice": 66.44994731296102,
+      "unit": "$/ton",
+      "amount": 1891.83,
+      "rawQty": 56940
+    },
+    {
       "dateStr": "2025-11-12",
       "product": "Cracked Corn",
       "type": "corn",
@@ -441,6 +815,72 @@
       "unit": "$/bu",
       "amount": 32755.35,
       "rawQty": 431600
+    },
+    {
+      "dateStr": "2025-11-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.2 T",
+      "ourPrice": 56.44983461962514,
+      "unit": "$/ton",
+      "amount": 1536,
+      "rawQty": 54420
+    },
+    {
+      "dateStr": "2025-11-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.6 T",
+      "ourPrice": 56.45,
+      "unit": "$/ton",
+      "amount": 1614.47,
+      "rawQty": 57200
+    },
+    {
+      "dateStr": "2025-11-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.3 T",
+      "ourPrice": 66.4501100513573,
+      "unit": "$/ton",
+      "amount": 1811.43,
+      "rawQty": 54520
+    },
+    {
+      "dateStr": "2025-11-25",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.3 T",
+      "ourPrice": 56.84005869405723,
+      "unit": "$/ton",
+      "amount": 1549.46,
+      "rawQty": 54520
+    },
+    {
+      "dateStr": "2025-11-25",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 56.840070298769774,
+      "unit": "$/ton",
+      "amount": 1617.1,
+      "rawQty": 56900
+    },
+    {
+      "dateStr": "2025-11-25",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.2 T",
+      "ourPrice": 66.83989300726022,
+      "unit": "$/ton",
+      "amount": 1749.2,
+      "rawQty": 52340
     },
     {
       "dateStr": "2025-11-26",
@@ -474,6 +914,39 @@
       "unit": "$/bu",
       "amount": 4958.72,
       "rawQty": 61300
+    },
+    {
+      "dateStr": "2025-11-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.3 T",
+      "ourPrice": 56.44990825688073,
+      "unit": "$/ton",
+      "amount": 1538.26,
+      "rawQty": 54500
+    },
+    {
+      "dateStr": "2025-11-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.2 T",
+      "ourPrice": 56.4499263622975,
+      "unit": "$/ton",
+      "amount": 1533.18,
+      "rawQty": 54320
+    },
+    {
+      "dateStr": "2025-11-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.1 T",
+      "ourPrice": 66.450110864745,
+      "unit": "$/ton",
+      "amount": 1798.14,
+      "rawQty": 54120
     },
     {
       "dateStr": "2025-12-08",
@@ -531,6 +1004,50 @@
       "rawQty": 66760
     },
     {
+      "dateStr": "2025-12-09",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.1 T",
+      "ourPrice": 56.84008843036109,
+      "unit": "$/ton",
+      "amount": 1542.64,
+      "rawQty": 54280
+    },
+    {
+      "dateStr": "2025-12-09",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.1 T",
+      "ourPrice": 66.83992606284659,
+      "unit": "$/ton",
+      "amount": 1808.02,
+      "rawQty": 54100
+    },
+    {
+      "dateStr": "2025-12-09",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.1 T",
+      "ourPrice": 56.84004432951607,
+      "unit": "$/ton",
+      "amount": 1538.66,
+      "rawQty": 54140
+    },
+    {
+      "dateStr": "2025-12-09",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.4 T",
+      "ourPrice": 66.84014598540146,
+      "unit": "$/ton",
+      "amount": 1831.42,
+      "rawQty": 54800
+    },
+    {
       "dateStr": "2025-12-13",
       "product": "Hay - Alfalfa",
       "type": "alfalfa",
@@ -575,6 +1092,50 @@
       "rawQty": 61820
     },
     {
+      "dateStr": "2025-12-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.2 T",
+      "ourPrice": 58.04001468428781,
+      "unit": "$/ton",
+      "amount": 1581.01,
+      "rawQty": 54480
+    },
+    {
+      "dateStr": "2025-12-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.4 T",
+      "ourPrice": 58.04007285974499,
+      "unit": "$/ton",
+      "amount": 1593.2,
+      "rawQty": 54900
+    },
+    {
+      "dateStr": "2025-12-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.6 T",
+      "ourPrice": 68.03992740471868,
+      "unit": "$/ton",
+      "amount": 1874.5,
+      "rawQty": 55100
+    },
+    {
+      "dateStr": "2025-12-16",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.2 T",
+      "ourPrice": 68.04001468428781,
+      "unit": "$/ton",
+      "amount": 1853.41,
+      "rawQty": 54480
+    },
+    {
       "dateStr": "2025-12-23",
       "product": "Cracked Corn",
       "type": "corn",
@@ -606,6 +1167,50 @@
       "unit": "$/bu",
       "amount": 5205.25,
       "rawQty": 62020
+    },
+    {
+      "dateStr": "2025-12-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.4 T",
+      "ourPrice": 58.170010944910615,
+      "unit": "$/ton",
+      "amount": 1594.44,
+      "rawQty": 54820
+    },
+    {
+      "dateStr": "2025-12-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.4 T",
+      "ourPrice": 58.17012750455373,
+      "unit": "$/ton",
+      "amount": 1596.77,
+      "rawQty": 54900
+    },
+    {
+      "dateStr": "2025-12-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.6 T",
+      "ourPrice": 68.17011244105912,
+      "unit": "$/ton",
+      "amount": 1879.45,
+      "rawQty": 55140
+    },
+    {
+      "dateStr": "2025-12-23",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.0 T",
+      "ourPrice": 68.1701812800592,
+      "unit": "$/ton",
+      "amount": 1842.64,
+      "rawQty": 54060
     },
     {
       "dateStr": "2025-12-30",
@@ -661,6 +1266,72 @@
       "unit": "$/ton",
       "amount": 4006.8,
       "rawQty": 66780
+    },
+    {
+      "dateStr": "2025-12-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.1 T",
+      "ourPrice": 57.770110701107015,
+      "unit": "$/ton",
+      "amount": 1565.57,
+      "rawQty": 54200
+    },
+    {
+      "dateStr": "2025-12-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 57.77004592016955,
+      "unit": "$/ton",
+      "amount": 1635.47,
+      "rawQty": 56620
+    },
+    {
+      "dateStr": "2025-12-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.4 T",
+      "ourPrice": 67.76990504017532,
+      "unit": "$/ton",
+      "amount": 1855.54,
+      "rawQty": 54760
+    },
+    {
+      "dateStr": "2025-12-30",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.3 T",
+      "ourPrice": 67.77007700770076,
+      "unit": "$/ton",
+      "amount": 1848.09,
+      "rawQty": 54540
+    },
+    {
+      "dateStr": "2025-12-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 58.82992237120677,
+      "unit": "$/ton",
+      "amount": 1667.24,
+      "rawQty": 56680
+    },
+    {
+      "dateStr": "2025-12-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.4 T",
+      "ourPrice": 58.8299823633157,
+      "unit": "$/ton",
+      "amount": 1667.83,
+      "rawQty": 56700
     },
     {
       "dateStr": "2026-01-05",
@@ -740,6 +1411,50 @@
       "rawQty": 59660
     },
     {
+      "dateStr": "2026-01-13",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.9 T",
+      "ourPrice": 60.67982129560686,
+      "unit": "$/ton",
+      "amount": 1629.86,
+      "rawQty": 53720
+    },
+    {
+      "dateStr": "2026-01-13",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.9 T",
+      "ourPrice": 60.68015759312321,
+      "unit": "$/ton",
+      "amount": 1694.19,
+      "rawQty": 55840
+    },
+    {
+      "dateStr": "2026-01-13",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 70.68011527377521,
+      "unit": "$/ton",
+      "amount": 1962.08,
+      "rawQty": 55520
+    },
+    {
+      "dateStr": "2026-01-13",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 70.67985611510791,
+      "unit": "$/ton",
+      "amount": 1964.9,
+      "rawQty": 55600
+    },
+    {
       "dateStr": "2026-01-14",
       "product": "Cracked Corn",
       "type": "corn",
@@ -793,6 +1508,50 @@
       "unit": "$/bu",
       "amount": 4843.06,
       "rawQty": 61360
+    },
+    {
+      "dateStr": "2026-01-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.9 T",
+      "ourPrice": 61.10017889087656,
+      "unit": "$/ton",
+      "amount": 1707.75,
+      "rawQty": 55900
+    },
+    {
+      "dateStr": "2026-01-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 61.10007199424046,
+      "unit": "$/ton",
+      "amount": 1697.36,
+      "rawQty": 55560
+    },
+    {
+      "dateStr": "2026-01-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.9 T",
+      "ourPrice": 71.0998925886144,
+      "unit": "$/ton",
+      "amount": 1985.82,
+      "rawQty": 55860
+    },
+    {
+      "dateStr": "2026-01-21",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 71.09996467679265,
+      "unit": "$/ton",
+      "amount": 2012.84,
+      "rawQty": 56620
     },
     {
       "dateStr": "2026-01-22",
@@ -883,6 +1642,83 @@
       "rawQty": 58940
     },
     {
+      "dateStr": "2026-01-27",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.2 T",
+      "ourPrice": 58.58985667034178,
+      "unit": "$/ton",
+      "amount": 1594.23,
+      "rawQty": 54420
+    },
+    {
+      "dateStr": "2026-01-27",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.9 T",
+      "ourPrice": 58.589946140035906,
+      "unit": "$/ton",
+      "amount": 1631.73,
+      "rawQty": 55700
+    },
+    {
+      "dateStr": "2026-01-27",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 68.59004237288136,
+      "unit": "$/ton",
+      "amount": 1942.47,
+      "rawQty": 56640
+    },
+    {
+      "dateStr": "2026-01-27",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.2 T",
+      "ourPrice": 68.58992276572269,
+      "unit": "$/ton",
+      "amount": 1864.96,
+      "rawQty": 54380
+    },
+    {
+      "dateStr": "2026-01-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 59.98988385162982,
+      "unit": "$/ton",
+      "amount": 1601.13,
+      "rawQty": 53380
+    },
+    {
+      "dateStr": "2026-01-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.6 T",
+      "ourPrice": 59.989838163342114,
+      "unit": "$/ton",
+      "amount": 1593.93,
+      "rawQty": 53140
+    },
+    {
+      "dateStr": "2026-01-31",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.9 T",
+      "ourPrice": 69.98998144712431,
+      "unit": "$/ton",
+      "amount": 1886.23,
+      "rawQty": 53900
+    },
+    {
       "dateStr": "2026-02-02",
       "product": "Cracked Corn",
       "type": "corn",
@@ -914,6 +1750,17 @@
       "unit": "$/bu",
       "amount": 4888.47,
       "rawQty": 61380
+    },
+    {
+      "dateStr": "2026-02-03",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.9 T",
+      "ourPrice": 69.98997493734335,
+      "unit": "$/ton",
+      "amount": 1954.82,
+      "rawQty": 55860
     },
     {
       "dateStr": "2026-02-05",
@@ -982,6 +1829,50 @@
       "rawQty": 63480
     },
     {
+      "dateStr": "2026-02-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.0 T",
+      "ourPrice": 60.5401703072936,
+      "unit": "$/ton",
+      "amount": 1635.19,
+      "rawQty": 54020
+    },
+    {
+      "dateStr": "2026-02-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 60.54004491017964,
+      "unit": "$/ton",
+      "amount": 1617.63,
+      "rawQty": 53440
+    },
+    {
+      "dateStr": "2026-02-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.8 T",
+      "ourPrice": 70.53986587183309,
+      "unit": "$/ton",
+      "amount": 1893.29,
+      "rawQty": 53680
+    },
+    {
+      "dateStr": "2026-02-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.2 T",
+      "ourPrice": 70.53985122210415,
+      "unit": "$/ton",
+      "amount": 1991.34,
+      "rawQty": 56460
+    },
+    {
       "dateStr": "2026-02-11",
       "product": "Hay - Grass",
       "type": "grass",
@@ -1024,6 +1915,50 @@
       "unit": "$/ton",
       "amount": 10918.6,
       "rawQty": 155980
+    },
+    {
+      "dateStr": "2026-02-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.3 T",
+      "ourPrice": 59.99010250972075,
+      "unit": "$/ton",
+      "amount": 1697.12,
+      "rawQty": 56580
+    },
+    {
+      "dateStr": "2026-02-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.4 T",
+      "ourPrice": 59.99013878743609,
+      "unit": "$/ton",
+      "amount": 1642.53,
+      "rawQty": 54760
+    },
+    {
+      "dateStr": "2026-02-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.3 T",
+      "ourPrice": 75,
+      "unit": "$/ton",
+      "amount": 2194.5,
+      "rawQty": 58520
+    },
+    {
+      "dateStr": "2026-02-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.7 T",
+      "ourPrice": 75,
+      "unit": "$/ton",
+      "amount": 2224.5,
+      "rawQty": 59320
     },
     {
       "dateStr": "2026-02-24",
@@ -1079,6 +2014,50 @@
       "unit": "$/bu",
       "amount": 4828.37,
       "rawQty": 60220
+    },
+    {
+      "dateStr": "2026-02-24",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.3 T",
+      "ourPrice": 59.99011713030747,
+      "unit": "$/ton",
+      "amount": 1638.93,
+      "rawQty": 54640
+    },
+    {
+      "dateStr": "2026-02-24",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.6 T",
+      "ourPrice": 59.98986722571628,
+      "unit": "$/ton",
+      "amount": 1716.91,
+      "rawQty": 57240
+    },
+    {
+      "dateStr": "2026-02-25",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "30.1 T",
+      "ourPrice": 75,
+      "unit": "$/ton",
+      "amount": 2256,
+      "rawQty": 60160
+    },
+    {
+      "dateStr": "2026-02-25",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.6 T",
+      "ourPrice": 75,
+      "unit": "$/ton",
+      "amount": 2216.25,
+      "rawQty": 59100
     },
     {
       "dateStr": "2026-02-26",
@@ -1178,6 +2157,50 @@
       "unit": "$/ton",
       "amount": 2995.2,
       "rawQty": 46080
+    },
+    {
+      "dateStr": "2026-02-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.8 T",
+      "ourPrice": 59.56993659082432,
+      "unit": "$/ton",
+      "amount": 1597.07,
+      "rawQty": 53620
+    },
+    {
+      "dateStr": "2026-02-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 59.57014253563391,
+      "unit": "$/ton",
+      "amount": 1588.14,
+      "rawQty": 53320
+    },
+    {
+      "dateStr": "2026-02-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.8 T",
+      "ourPrice": 76,
+      "unit": "$/ton",
+      "amount": 2264.04,
+      "rawQty": 59580
+    },
+    {
+      "dateStr": "2026-02-28",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.8 T",
+      "ourPrice": 76,
+      "unit": "$/ton",
+      "amount": 2267.84,
+      "rawQty": 59680
     },
     {
       "dateStr": "2026-03-03",
@@ -1290,6 +2313,50 @@
       "rawQty": 39088
     },
     {
+      "dateStr": "2026-03-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 61.09988776655444,
+      "unit": "$/ton",
+      "amount": 1633.2,
+      "rawQty": 53460
+    },
+    {
+      "dateStr": "2026-03-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 61.10003746721618,
+      "unit": "$/ton",
+      "amount": 1630.76,
+      "rawQty": 53380
+    },
+    {
+      "dateStr": "2026-03-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "28.2 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2171.4,
+      "rawQty": 56400
+    },
+    {
+      "dateStr": "2026-03-10",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2137.52,
+      "rawQty": 55520
+    },
+    {
       "dateStr": "2026-03-13",
       "product": "Hay - Grass",
       "type": "grass",
@@ -1301,6 +2368,72 @@
       "rawQty": 379340
     },
     {
+      "dateStr": "2026-03-17",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.8 T",
+      "ourPrice": 61.660067239447145,
+      "unit": "$/ton",
+      "amount": 1650.64,
+      "rawQty": 53540
+    },
+    {
+      "dateStr": "2026-03-17",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.9 T",
+      "ourPrice": 61.66008935219657,
+      "unit": "$/ton",
+      "amount": 1656.19,
+      "rawQty": 53720
+    },
+    {
+      "dateStr": "2026-03-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.4 T",
+      "ourPrice": 75,
+      "unit": "$/ton",
+      "amount": 2208,
+      "rawQty": 58880
+    },
+    {
+      "dateStr": "2026-03-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.3 T",
+      "ourPrice": 75,
+      "unit": "$/ton",
+      "amount": 2196.75,
+      "rawQty": 58580
+    },
+    {
+      "dateStr": "2026-03-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.1 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2090.55,
+      "rawQty": 54300
+    },
+    {
+      "dateStr": "2026-03-18",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.8 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2140.6,
+      "rawQty": 55600
+    },
+    {
       "dateStr": "2026-03-19",
       "product": "Cracked Corn",
       "type": "corn",
@@ -1310,6 +2443,72 @@
       "unit": "$/bu",
       "amount": 5258.73,
       "rawQty": 60100
+    },
+    {
+      "dateStr": "2026-03-24",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 62.90997749437359,
+      "unit": "$/ton",
+      "amount": 1677.18,
+      "rawQty": 53320
+    },
+    {
+      "dateStr": "2026-03-24",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "26.7 T",
+      "ourPrice": 75.40989134507306,
+      "unit": "$/ton",
+      "amount": 2012.69,
+      "rawQty": 53380
+    },
+    {
+      "dateStr": "2026-03-24",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "27.5 T",
+      "ourPrice": 62.91011644832606,
+      "unit": "$/ton",
+      "amount": 1728.77,
+      "rawQty": 54960
+    },
+    {
+      "dateStr": "2026-03-26",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.2 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2249.17,
+      "rawQty": 58420
+    },
+    {
+      "dateStr": "2026-03-26",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.5 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2273.04,
+      "rawQty": 59040
+    },
+    {
+      "dateStr": "2026-03-26",
+      "product": "WDG",
+      "type": "wdg",
+      "vendor": "Colorado Agri Products",
+      "qty": "29.4 T",
+      "ourPrice": 77,
+      "unit": "$/ton",
+      "amount": 2266.11,
+      "rawQty": 58860
     }
   ]
 }
