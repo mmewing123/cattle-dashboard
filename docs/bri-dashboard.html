@@ -916,7 +916,7 @@ const invFi = document.getElementById('inv-fi');
 invDz.addEventListener('dragover', e => { e.preventDefault(); invDz.classList.add('drag-over'); });
 invDz.addEventListener('dragleave', () => invDz.classList.remove('drag-over'));
 invDz.addEventListener('drop', e => { e.preventDefault(); invDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) invProcessFile(f); });
-invFi.addEventListener('change', e => { if(e.target.files[0]) invProcessFile(e.target.files[0]); });
+invFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) invProcessFile(e.target.files[0]); });
 
 function invProcessFile(file) {
   document.getElementById('inv-file-info').textContent = 'Parsing ' + file.name + '…';
@@ -939,7 +939,7 @@ function invProcessFile(file) {
 }
 
 // ── PARSE ─────────────────────────────────────────────────────────────────────
-function toDate(d) {
+function invToDate(d) {
   if (!d) return null;
   if (d instanceof Date) return d;
   if (typeof d === 'string') return new Date(d);
@@ -964,7 +964,7 @@ function parseInventory(rows) {
     }
     if (inSkip) continue;
 
-    const date = toDate(row[2]);
+    const date = invToDate(row[2]);
     const qty = row[6];
     const profitCenter = row[9] ? String(row[9]).trim() : null;
     const prodCenter   = row[10] ? String(row[10]).trim() : null;
@@ -986,7 +986,7 @@ function parseInventory(rows) {
 }
 
 // ── MONTH SETUP ───────────────────────────────────────────────────────────────
-function buildAvailableMonths(txns) {
+function invBuildAvailableMonths(txns) {
   const seen = new Set();
   txns.forEach(t => {
     const key = t.date.getFullYear() + '-' + String(t.date.getMonth()+1).padStart(2,'0');
@@ -1001,8 +1001,8 @@ function buildAvailableMonths(txns) {
   });
 }
 
-function selectedMonthEnd() { return invAvailableMonths[invMonthIdx].monthEnd; }
-function selectedMonthStart() {
+function invSelectedMonthEnd() { return invAvailableMonths[invMonthIdx].monthEnd; }
+function invSelectedMonthStart() {
   const m = invAvailableMonths[invMonthIdx];
   return new Date(m.year, m.month - 1, 1);
 }
@@ -1016,7 +1016,7 @@ document.getElementById('inv-next-month').onclick = () => {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function invInitDashboard() {
-  availableMonths = buildAvailableMonths(invAllTxns);
+  invAvailableMonths = invBuildAvailableMonths(invAllTxns);
   invMonthIdx = invAvailableMonths.length - 1; // default to latest
 
   const allClasses = [...new Set(invAllTxns.map(t => t.class))].sort();
@@ -1081,13 +1081,13 @@ function invRenderAll() {
   document.getElementById('inv-next-month').disabled = invMonthIdx === invAvailableMonths.length - 1;
 
   const filtered = invAllTxns.filter(t => invActiveClasses.has(t.class));
-  const monthEnd = selectedMonthEnd();
-  const monthStart = selectedMonthStart();
+  const monthEnd = invSelectedMonthEnd();
+  const monthStart = invSelectedMonthStart();
 
   // Net head as of month-end
-  const hdSnapshot = computeNetHead(filtered, monthEnd);
+  const hdSnapshot = invComputeNetHead(filtered, monthEnd);
   // Head days accrued during the selected month only
-  const hdMonth = computeMonthHeadDays(filtered, monthStart, monthEnd);
+  const hdMonth = invComputeMonthHeadDays(filtered, monthStart, monthEnd);
 
   const allClasses = [...new Set(invAllTxns.map(t => t.class))].sort();
   invBuildClassChips(allClasses);
@@ -1099,7 +1099,7 @@ function invRenderAll() {
 
 // ── HEAD CALCULATION ──────────────────────────────────────────────────────────
 // Net head per (location, class) as of a given date
-function computeNetHead(txns, asOf) {
+function invComputeNetHead(txns, asOf) {
   const map = {};
   for (const t of txns) {
     if (t.date > asOf) continue;
@@ -1117,7 +1117,7 @@ function computeNetHead(txns, asOf) {
 }
 
 // Head days that accrued WITHIN [monthStart, monthEnd] inclusive
-function computeMonthHeadDays(txns, monthStart, monthEnd) {
+function invComputeMonthHeadDays(txns, monthStart, monthEnd) {
   // Group by lot key
   const groups = {};
   for (const t of txns) {
@@ -1364,10 +1364,10 @@ function invToggleRow(ri) {
   if (invExpandedRows.has(ri)) invExpandedRows.delete(ri);
   else invExpandedRows.add(ri);
   const filtered = invAllTxns.filter(t => invActiveClasses.has(t.class));
-  const monthEnd = selectedMonthEnd();
-  const monthStart = selectedMonthStart();
-  const hdSnapshot = computeNetHead(filtered, monthEnd);
-  const hdMonth = computeMonthHeadDays(filtered, monthStart, monthEnd);
+  const monthEnd = invSelectedMonthEnd();
+  const monthStart = invSelectedMonthStart();
+  const hdSnapshot = invComputeNetHead(filtered, monthEnd);
+  const hdMonth = invComputeMonthHeadDays(filtered, monthStart, monthEnd);
   invRenderTable(hdSnapshot, hdMonth);
 }
 
@@ -1375,10 +1375,10 @@ function invSetSort(col) {
   if (invSortCol===col) invSortAsc=!invSortAsc; else { invSortCol=col; invSortAsc=false; }
   invExpandedRows.clear();
   const filtered = invAllTxns.filter(t => invActiveClasses.has(t.class));
-  const monthEnd = selectedMonthEnd();
-  const monthStart = selectedMonthStart();
-  const hdSnapshot = computeNetHead(filtered, monthEnd);
-  const hdMonth = computeMonthHeadDays(filtered, monthStart, monthEnd);
+  const monthEnd = invSelectedMonthEnd();
+  const monthStart = invSelectedMonthStart();
+  const hdSnapshot = invComputeNetHead(filtered, monthEnd);
+  const hdMonth = invComputeMonthHeadDays(filtered, monthStart, monthEnd);
   invRenderTable(hdSnapshot, hdMonth);
 }
 
