@@ -167,13 +167,15 @@ def fetch_wdg():
 
         by_date[normalize_date(date_raw)].append(price)
 
-    # Debug: print unique Nebraska commodities found to confirm matching
-    ne_commodities = set(
-        str(r.get("commodity", ""))
-        for r in detail_rows
+    # Debug: print all Nebraska Distillers Grain rows to find wet/dry field
+    ne_dg_rows = [
+        r for r in detail_rows
         if "nebraska" in str(r.get("trade_loc", "")).lower()
-    )
-    print(f"  Nebraska commodities found: {ne_commodities}")
+        and "distillers grain" in str(r.get("commodity", "")).lower()
+    ]
+    print(f"  Nebraska Distillers Grain rows: {len(ne_dg_rows)}")
+    for r in ne_dg_rows[:6]:
+        print(f"    {r}")
 
     result = [{"date": d, "price": round(sum(v)/len(v), 2)} for d, v in sorted(by_date.items())]
     print(f"  WDG data points: {len(result)}")
