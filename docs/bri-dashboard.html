@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRI Operations Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;
+    --accent:#3b82f6;--accent2:#10b981;--accent3:#f59e0b;
+    --text:#e2e8f0;--muted:#64748b;--danger:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+
+  /* GATE */
+  #gate{display:flex;align-items:center;justify-content:center;min-height:100vh;
+    background:radial-gradient(ellipse at center,#1a1d27 0%,#0f1117 70%);}
+  .gate-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:48px 56px;text-align:center;width:380px;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+  .gate-logo{font-size:2rem;font-weight:800;letter-spacing:-1px;}
+  .gate-logo span{color:var(--accent);}
+  .gate-sub{color:var(--muted);font-size:.875rem;margin-top:6px;margin-bottom:32px;}
+  .gate-label{display:block;text-align:left;font-size:.75rem;font-weight:600;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+  .gate-input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s;}
+  .gate-input:focus{border-color:var(--accent);}
+  .gate-btn{width:100%;margin-top:16px;padding:13px;background:var(--accent);border:none;
+    border-radius:8px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;}
+  .gate-btn:hover{opacity:.85;}
+  .gate-error{color:var(--danger);font-size:.875rem;margin-top:12px;min-height:20px;}
+
+  /* APP */
+  #app{display:none;}
+  .top-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 32px;border-bottom:1px solid var(--border);
+    background:var(--surface);position:sticky;top:0;z-index:10;}
+  .brand{font-size:1.1rem;font-weight:700;}
+  .brand span{color:var(--accent);}
+  .lock-btn{background:none;border:1px solid var(--border);color:var(--muted);
+    padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;transition:all .2s;}
+  .lock-btn:hover{border-color:var(--accent);color:var(--text);}
+  .content{padding:32px;max-width:1300px;margin:0 auto;}
+
+  /* UPLOAD */
+  .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:48px;
+    text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);margin-bottom:32px;}
+  .upload-zone.drag-over{border-color:var(--accent);background:rgba(59,130,246,.05);}
+  .upload-zone.loaded{border-color:var(--accent2);border-style:solid;}
+  .upload-icon{font-size:2.5rem;margin-bottom:12px;}
+  .upload-title{font-size:1.1rem;font-weight:600;margin-bottom:6px;}
+  .upload-sub{color:var(--muted);font-size:.875rem;}
+  .upload-input{display:none;}
+  .file-info{margin-top:12px;font-size:.875rem;color:var(--accent2);font-weight:500;}
+
+  /* STATS */
+  .stat-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px;}
+  .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px;}
+  .stat-pill .slabel{font-size:.72rem;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.08em;margin-bottom:4px;}
+  .stat-pill .sval{font-size:1.25rem;font-weight:700;}
+  .green{color:var(--accent2);} .red{color:var(--danger);} .yellow{color:var(--accent3);}
+
+  /* CHARTS */
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;}
+  @media(max-width:900px){.chart-grid{grid-template-columns:1fr;}}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;}
+  .chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+  .chart-title{font-size:1rem;font-weight:700;}
+  .chart-sub{color:var(--muted);font-size:.8rem;margin-top:3px;}
+  .badge{font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  .badge-green{background:rgba(16,185,129,.15);color:var(--accent2);}
+  .badge-red{background:rgba(239,68,68,.15);color:var(--danger);}
+  .badge-neutral{background:rgba(100,116,139,.15);color:var(--muted);}
+  canvas{max-height:300px;}
+
+  /* TABLE */
+  .table-card{background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;margin-bottom:32px;}
+  .table-head-row{padding:18px 24px;border-bottom:1px solid var(--border);font-weight:700;}
+  .filter-row{display:flex;gap:8px;padding:10px 24px;border-bottom:1px solid var(--border);}
+  .filter-btn{background:none;border:1px solid var(--border);color:var(--muted);
+    padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;transition:all .15s;}
+  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.84rem;}
+  th{padding:10px 16px;text-align:left;font-size:.72rem;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);}
+  td{padding:9px 16px;border-bottom:1px solid rgba(42,45,62,.5);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(59,130,246,.03);}
+  .vs-below{color:var(--accent2);font-weight:600;}
+  .vs-above{color:var(--danger);font-weight:600;}
+  .vs-na{color:var(--muted);}
+
+  /* NOTICE */
+  .mkt-note{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);
+    border-radius:8px;padding:12px 16px;font-size:.82rem;color:var(--accent3);margin-bottom:24px;}
+
+  /* EMPTY */
+  .empty{text-align:center;padding:80px 32px;color:var(--muted);}
+  .empty .eicon{font-size:3rem;margin-bottom:16px;opacity:.3;}
+
+
+  /* ── TABS ─────────────────────────────────────────────── */
+  .tab-nav{display:flex;gap:4px;}
+  .tab-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:7px 20px;
+    border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;}
+  .tab-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tab-pane{display:none;}.tab-pane.active{display:block;}
+
+  /* ── INVENTORY-SPECIFIC (non-duplicate) ───────────────── */
+
+
+
+/* UPLOAD */
+.upload-zone.loaded .upload-icon,.upload-zone.loaded .upload-title,.upload-zone.loaded .upload-sub{display:none;}
+
+/* STATS */
+.stat-bar{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 18px;}
+.stat-pill .slabel{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.stat-pill .sval{font-size:1.2rem;font-weight:700;}
+.sval.green{color:var(--accent2);}.sval.amber{color:var(--accent3);}.sval.blue{color:var(--accent);}
+
+/* CONTROLS PANEL */
+.controls-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:24px;}
+.ctrl-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.ctrl-row + .ctrl-row{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.ctrl-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;width:80px;flex-shrink:0;}
+.ctrl-items{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.toggle-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .15s;}
+.toggle-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.class-chip{background:none;border:1px solid;padding:4px 11px;border-radius:999px;cursor:pointer;font-size:.74rem;font-weight:600;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.class-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* MONTH PICKER */
+.month-select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.82rem;cursor:pointer;outline:none;}
+.month-select:focus{border-color:var(--accent);}
+.month-nav{display:flex;align-items:center;gap:8px;}
+.month-arrow{background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.month-arrow:hover{border-color:var(--accent);color:var(--text);}
+.month-label{font-size:.9rem;font-weight:600;min-width:120px;text-align:center;}
+
+/* CHART */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:24px;}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.chart-title{font-size:.95rem;font-weight:700;}
+.chart-sub{color:var(--muted);font-size:.78rem;margin-top:2px;}
+
+/* TABLE */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+.table-head-row{padding:14px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:.88rem;display:flex;align-items:center;justify-content:space-between;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.83rem;}
+th{padding:9px 16px;text-align:left;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;}
+th:hover{color:var(--text);}
+th .sort-icon{display:inline-block;margin-left:4px;opacity:.4;}
+th.sorted .sort-icon{opacity:1;color:var(--accent);}
+td{padding:9px 16px;border-bottom:1px solid rgba(42,45,62,.5);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(59,130,246,.03);}
+.bar-cell{display:flex;align-items:center;gap:8px;}
+.mini-bar{height:6px;border-radius:3px;min-width:2px;}
+.num{font-variant-numeric:tabular-nums;}
+.loc-name{font-weight:600;}
+.sub-row td{background:rgba(42,45,62,.3);font-size:.78rem;}
+.sub-row td:first-child{padding-left:36px;}
+.expandable{cursor:pointer;}
+.expandable:hover td{background:rgba(59,130,246,.05)!important;}
+.expand-icon{display:inline-block;width:16px;color:var(--muted);font-size:.7rem;}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px;color:var(--muted);}
+.empty .eicon{font-size:2.5rem;margin-bottom:12px;opacity:.3;}
+
+  /* inv upload zone (separate from rm upload zone) */
+  .inv-upload-zone{border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;
+    cursor:pointer;background:var(--surface);margin-bottom:24px;transition:all .2s;}
+  .inv-upload-zone.drag-over{border-color:var(--accent);background:rgba(59,130,246,.05);}
+  .inv-upload-zone.loaded{border-color:var(--accent2);border-style:solid;padding:14px 36px;}
+  .inv-upload-zone.loaded .upload-icon,
+  .inv-upload-zone.loaded .upload-title,
+  .inv-upload-zone.loaded .upload-sub{display:none;}
+  .inv-file-info{margin-top:6px;font-size:.83rem;color:var(--accent2);font-weight:500;}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">Black<span>Ranches</span></div>
+    <div class="gate-sub">Operations Dashboard</div>
+    <label class="gate-label" for="pw">Password</label>
+    <input class="gate-input" id="pw" type="password" placeholder="Enter password" autocomplete="current-password">
+    <button class="gate-btn" onclick="doLogin()">Access Dashboard →</button>
+    <div class="gate-error" id="pw-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="brand">Black<span>Ranches</span> &middot; Operations</div>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="rm">📈 RM Cost vs. Market</button>
+      <button class="tab-btn" data-tab="inventory">🐄 Cattle Inventory</button>
+    </div>
+    <button class="lock-btn" onclick="lock()">🔒 Lock</button>
+  </div>
+
+  <!-- RM TAB -->
+  <div class="tab-pane active" id="tab-rm">
+    <div class="content">
+
+      <div class="upload-zone" id="drop-zone" onclick="document.getElementById('fi').click()">
+        <div class="upload-icon">📂</div>
+        <div class="upload-title">Drop Centerpoint Feed &amp; Medicine RM Inventory Export Here</div>
+        <div class="upload-sub">Click to browse — accepts .xlsx files exported from Centerpoint</div>
+        <div class="file-info" id="file-info"></div>
+        <input type="file" class="upload-input" id="fi" accept=".xlsx,.xls">
+      </div>
+
+      <div class="stat-bar" id="stat-bar"></div>
+      <div class="mkt-note" id="mkt-note" style="display:none">
+        ⚠ Market comparison not available — <strong>market_data.json</strong> was not found.
+      </div>
+
+      <div class="chart-grid" id="chart-grid" style="display:none">
+        <div class="chart-card">
+          <div class="chart-head">
+            <div><div class="chart-title">Cracked Corn — $/bu</div>
+                 <div class="chart-sub">Purchase price vs. Alliance USDA elevator bid</div></div>
+            <span class="badge badge-neutral" id="corn-badge">No market data</span>
+          </div>
+          <canvas id="corn-chart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head">
+            <div><div class="chart-title">Hay (Alfalfa &amp; Grass) — $/ton</div>
+                 <div class="chart-sub">Purchase price vs. USDA Nebraska Direct Hay Report</div></div>
+            <span class="badge badge-neutral" id="hay-badge">No market data</span>
+          </div>
+          <canvas id="hay-chart"></canvas>
+        </div>
+        <div class="chart-card" style="grid-column:1/-1">
+          <div class="chart-head">
+            <div><div class="chart-title">WDG (Wet Distillers Grains 65-70%) — $/ton</div>
+                 <div class="chart-sub">BRI delivered price vs. USDA Nebraska FOB plant (3618) — freight not included in benchmark</div></div>
+            <span class="badge badge-neutral" id="wdg-badge">No market data</span>
+          </div>
+          <canvas id="wdg-chart" style="max-height:260px"></canvas>
+        </div>
+      </div>
+
+      <div class="table-card" id="txn-card" style="display:none">
+        <div class="table-head-row" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Purchase Transactions</span>
+          <button onclick="saveShared()" style="background:var(--accent2);border:none;color:#fff;
+            padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600">
+            💾 Save for Sharing
+          </button>
+        </div>
+        <div class="filter-row" id="filter-row">
+          <button class="filter-btn active" data-f="all">All</button>
+          <button class="filter-btn" data-f="corn">🌽 Corn</button>
+          <button class="filter-btn" data-f="alfalfa">🌿 Alfalfa</button>
+          <button class="filter-btn" data-f="grass">🌾 Grass</button>
+          <button class="filter-btn" data-f="wdg">🌾 WDG</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Product</th><th>Vendor</th><th>Qty</th>
+              <th>Our Price</th><th>Market Benchmark</th><th>vs. Market</th><th>$ Impact</th>
+            </tr></thead>
+            <tbody id="txn-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="empty" id="empty-state">
+        <div class="eicon">📊</div>
+        <p>Upload your Centerpoint Feed &amp; Medicine RM Inventory export above<br>to see purchase prices plotted against USDA market benchmarks.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INVENTORY TAB -->
+  <div class="tab-pane" id="tab-inventory">
+    <div class="content">
+<div class="inv-upload-zone" id="inv-drop-zone" onclick="document.getElementById('inv-fi').click()">
+    <div class="upload-icon">🐄</div>
+    <div class="upload-title">Drop Centerpoint Cattle Inventory Export Here</div>
+    <div class="upload-sub">Click to browse — accepts .xlsx files exported from Centerpoint</div>
+    <div class="file-info" id="inv-file-info"></div>
+    <input type="file" id="inv-fi" accept=".xlsx,.xls">
+  </div>
+
+  <div id="inv-dashboard" style="display:none">
+
+    <!-- STATS -->
+    <div class="stat-bar" id="inv-stat-bar"></div>
+
+    <!-- CONTROLS PANEL -->
+    <div class="controls-panel">
+
+      <!-- Row 1: Month selector + View toggle -->
+      <div class="ctrl-row">
+        <span class="ctrl-label">Month</span>
+        <div class="ctrl-items">
+          <div class="month-nav">
+            <button class="month-arrow" id="inv-prev-month">&#8249;</button>
+            <span class="month-label" id="inv-month-label">—</span>
+            <button class="month-arrow" id="inv-next-month">&#8250;</button>
+          </div>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);margin:0 4px"></div>
+        <span class="ctrl-label">View by</span>
+        <div class="ctrl-items">
+          <button class="toggle-btn active" data-view="location">Location</button>
+          <button class="toggle-btn" data-view="class">Class</button>
+          <button class="toggle-btn" data-view="lot">Lot</button>
+        </div>
+      </div>
+
+      <!-- Row 2: Class filters -->
+      <div class="ctrl-row">
+        <span class="ctrl-label">Classes</span>
+        <div class="ctrl-items" id="inv-class-chips"></div>
+      </div>
+
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title" id="inv-chart-title">Head by Location</div>
+          <div class="chart-sub" id="inv-chart-sub">Stacked by class · current net head</div>
+        </div>
+      </div>
+      <canvas id="inv-main-chart" style="max-height:340px"></canvas>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-head-row">
+        <span id="inv-table-title">Inventory Detail</span>
+        <span style="font-size:.73rem;color:var(--muted);font-weight:400">Click row to expand · click column header to sort</span>
+        <button onclick="invSaveShared()" style="background:var(--accent2);border:none;color:#fff;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600">💾 Save for Sharing</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr id="inv-table-head"></tr></thead>
+          <tbody id="inv-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="empty" id="inv-empty-state">
+    <div class="eicon">📊</div>
+    <p>Upload your Centerpoint Cattle Inventory export above<br>to see head counts, classes, and head days by location.</p>
+  </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// AUTH  (shared)
+// Password: BRI2026
+// ══════════════════════════════════════════════════════
+const STORED_HASH = 'daccdf2f21c1dcfbabba8e83ec0e20f229fb206c9d7a1d2b52748989d70f7126';
+const SESSION_KEY = 'bri_ops_v1';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const pw = document.getElementById('pw').value;
+  if (!pw) { document.getElementById('pw-err').textContent = 'Enter password.'; return; }
+  const h = await sha256(pw);
+  if (h === STORED_HASH) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('pw-err').textContent = '';
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    onLogin();
+  } else {
+    document.getElementById('pw-err').textContent = 'Incorrect password.';
+    document.getElementById('pw').value = '';
+  }
+}
+
+function lock() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pw').value = '';
+}
+
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+if (sessionStorage.getItem(SESSION_KEY)) {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  onLogin();
+}
+
+function onLogin() {
+  loadMarketData();   // RM tab — loads market_data.json then tries rm_transactions.json
+  invTryLoadShared(); // Inventory tab — tries cattle_inventory.json
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    // Resize charts when switching to a tab (Chart.js needs this)
+    if (btn.dataset.tab === 'inventory' && invMainChart) invMainChart.resize();
+    if (btn.dataset.tab === 'rm') {
+      if (cornChart) cornChart.resize();
+      if (hayChart) hayChart.resize();
+      if (wdgChart) wdgChart.resize();
+    }
+  };
+});
+
+// ══════════════════════════════════════════════════════
+// RM TAB — original code
+// ══════════════════════════════════════════════════════
+
+
+// ══════════════════════════════════════════════════════
+// MARKET DATA
+// market_data.json expected format:
+// {
+//   "corn":        [{"date":"2025-08-12","price":4.50}, ...],
+//   "hay_alfalfa": [{"date":"2025-08-01","price":145.0}, ...],
+//   "hay_grass":   [{"date":"2025-08-01","price":130.0}, ...]
+// }
+// Prices: corn = $/bu, hay = $/ton
+// ══════════════════════════════════════════════════════
+let marketData = null;
+
+async function loadMarketData() {
+  try {
+    const r = await fetch('./market_data.json?' + Date.now());
+    if (!r.ok) throw new Error();
+    marketData = await r.json();
+  } catch {
+    marketData = null;
+  }
+  // After market data loads, try to auto-load shared transaction data
+  await loadSharedTransactions();
+}
+
+async function loadSharedTransactions() {
+  try {
+    const r = await fetch('./rm_transactions.json?' + Date.now());
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.transactions || !data.transactions.length) return;
+    // Re-attach mktPrice using freshly loaded market data
+    const txns = data.transactions.map(t => ({
+      ...t,
+      dateObj: new Date(t.dateStr),
+      mktPrice: getMarketPrice(
+        t.type === 'corn' ? 'corn'
+        : t.type === 'alfalfa' ? 'hay_alfalfa'
+        : t.type === 'grass' ? 'hay_grass'
+        : 'wdg',
+        t.dateStr
+      ),
+    }));
+    document.getElementById('file-info').textContent =
+      '✓ Shared data loaded — ' + data.source + ' (' + data.generated + ')';
+    document.getElementById('drop-zone').classList.add('loaded');
+    renderAll(txns);
+  } catch {
+    // No shared file — normal, just wait for upload
+  }
+}
+
+function getMarketPrice(key, dateStr) {
+  if (!marketData || !marketData[key]) return null;
+  const pts = marketData[key]
+    .filter(d => d.date <= dateStr)
+    .sort((a,b) => b.date.localeCompare(a.date));
+  return pts.length ? pts[0].price : null;
+}
+
+// ══════════════════════════════════════════════════════
+// FILE UPLOAD
+// ══════════════════════════════════════════════════════
+const dz = document.getElementById('drop-zone');
+const fi = document.getElementById('fi');
+
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0]; if (f) processFile(f);
+});
+fi.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+  document.getElementById('file-info').textContent = 'Parsing ' + file.name + '…';
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null });
+      const txns = parseRows(rows);
+      document.getElementById('file-info').textContent =
+        '✓ ' + file.name + ' — ' + txns.length + ' purchase transactions found';
+      dz.classList.add('loaded');
+      renderAll(txns);
+    } catch(err) {
+      document.getElementById('file-info').textContent = 'Error: ' + err.message;
+    }
+  };
+  r.readAsArrayBuffer(file);
+}
+
+// ══════════════════════════════════════════════════════
+// PARSE
+// ══════════════════════════════════════════════════════
+function toDateStr(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d.toISOString().split('T')[0];
+  if (typeof d === 'string') return d.split('T')[0];
+  // Excel serial number
+  const epoch = new Date(1899, 11, 30);
+  epoch.setDate(epoch.getDate() + Math.floor(d));
+  return epoch.toISOString().split('T')[0];
+}
+
+const SKIP_NOTES = [
+  'beg balance','feed usage','usage/adj','usage/adjustment',
+  'adjust feed inv','ground hay','corn checkoff','shrink feed',
+  'hay ground','med usage','med adj'
+];
+
+function parseRows(rows) {
+  const txns = [];
+  for (const raw of rows) {
+    const row = Array.from({length:16}, (_,i) => raw[i] ?? null);
+    const date = row[3];
+    const product = row[7] ? String(row[7]).trim() : null;
+    const qty = row[8];
+    const pricePerLb = row[10];
+    const amount = row[11];
+    const notes = row[12] ? String(row[12]).trim().toLowerCase() : '';
+    const vendor = row[5] ? String(row[5]).trim() : '';
+
+    if (!date || !product) continue;
+    if (typeof qty !== 'number' || qty <= 0) continue;
+    if (SKIP_NOTES.some(s => notes.includes(s))) continue;
+
+    let type, ourPrice, unit, qtyLabel;
+
+    if (product === 'Cracked Corn') {
+      const m = (row[12] || '').match(/\$\s*([\d.]+)\s*\/\s*bu/i);
+      if (!m) continue;
+      ourPrice = parseFloat(m[1]);
+      unit = '$/bu';
+      type = 'corn';
+      const bu = qty / 56;
+      qtyLabel = bu.toFixed(0) + ' bu (' + (qty/2000).toFixed(1) + ' T)';
+    } else if (product === 'Hay - Alfalfa') {
+      if (!pricePerLb || pricePerLb <= 0) continue;
+      ourPrice = pricePerLb * 2000;
+      unit = '$/ton';
+      type = 'alfalfa';
+      qtyLabel = (qty/2000).toFixed(1) + ' T';
+    } else if (product === 'Hay - Grass') {
+      if (!pricePerLb || pricePerLb <= 0) continue;
+      ourPrice = pricePerLb * 2000;
+      unit = '$/ton';
+      type = 'grass';
+      qtyLabel = (qty/2000).toFixed(1) + ' T';
+    } else if (product === 'WDG') {
+      // Skip tonnage tax rows (zero or missing price) and trucking rows
+      if (!pricePerLb || pricePerLb <= 0) continue;
+      if (notes.includes('trucking') || notes.includes('tonnage tax')) continue;
+      ourPrice = pricePerLb * 2000;
+      unit = '$/ton';
+      type = 'wdg';
+      qtyLabel = (qty/2000).toFixed(1) + ' T';
+    } else {
+      continue;
+    }
+
+    const dateStr = toDateStr(date);
+    if (!dateStr) continue;
+    const mktKey = type === 'corn' ? 'corn'
+                 : type === 'alfalfa' ? 'hay_alfalfa'
+                 : type === 'grass'   ? 'hay_grass'
+                 : 'wdg';
+    const mktPrice = getMarketPrice(mktKey, dateStr);
+
+    txns.push({ dateStr, dateObj: new Date(dateStr), product, type,
+                vendor, qty: qtyLabel, ourPrice, mktPrice, unit,
+                amount: amount || 0, rawQty: qty });
+  }
+  return txns.sort((a,b) => a.dateObj - b.dateObj);
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+let cornChart, hayChart, wdgChart;
+let allTxns = [];
+
+function renderAll(txns) {
+  allTxns = txns;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('chart-grid').style.display = '';
+  document.getElementById('txn-card').style.display = '';
+
+  if (!marketData) document.getElementById('mkt-note').style.display = '';
+
+  const corn  = txns.filter(t => t.type==='corn');
+  const alfa  = txns.filter(t => t.type==='alfalfa');
+  const grass = txns.filter(t => t.type==='grass');
+  const wdg   = txns.filter(t => t.type==='wdg');
+
+  renderStats(corn, alfa, grass, wdg, txns);
+  buildCornChart(corn);
+  buildHayChart(alfa, grass);
+  buildWdgChart(wdg);
+  renderTable(txns, 'all');
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable(allTxns, btn.dataset.f);
+    };
+  });
+}
+
+function avg(arr) { const v=arr.filter(x=>x!=null); return v.length ? v.reduce((s,x)=>s+x,0)/v.length : null; }
+function fmt$(n,d=2) { return n==null?'—':'$'+n.toFixed(d); }
+
+function renderStats(corn, alfa, grass, wdg, all) {
+  const sb = document.getElementById('stat-bar');
+  const cornAvg  = avg(corn.map(t=>t.ourPrice));
+  const alfaAvg  = avg(alfa.map(t=>t.ourPrice));
+  const grassAvg = avg(grass.map(t=>t.ourPrice));
+  const wdgAvg   = avg(wdg.map(t=>t.ourPrice));
+  const spend = all.reduce((s,t)=>s+Math.abs(t.amount),0);
+
+  const mktRows = all.filter(t=>t.mktPrice);
+  let savings = null;
+  if (mktRows.length) {
+    savings = mktRows.reduce((s,t) => {
+      const tons = t.rawQty / 2000;
+      const bu = t.type==='corn' ? t.rawQty/56 : 0;
+      const qty = t.type==='corn' ? bu : tons;
+      return s + (t.mktPrice - t.ourPrice) * qty;
+    }, 0);
+  }
+
+  sb.innerHTML = [
+    pill('Avg Corn',    cornAvg  ? fmt$(cornAvg)+'/bu'   : '—', ''),
+    pill('Avg Alfalfa', alfaAvg  ? fmt$(alfaAvg,0)+'/ton': '—', ''),
+    pill('Avg Grass',   grassAvg ? fmt$(grassAvg,0)+'/ton':'—', ''),
+    pill('Avg WDG',     wdgAvg   ? fmt$(wdgAvg,0)+'/ton' : '—', ''),
+    pill('Total Feed Spend', '$'+spend.toLocaleString('en-US',{maximumFractionDigits:0}), ''),
+    savings != null ? pill('vs. Market',
+      (savings>=0?'▼ Saved ':'▲ Over ')+'$'+Math.abs(savings).toLocaleString('en-US',{maximumFractionDigits:0}),
+      savings>=0?'green':'red') : ''
+  ].join('');
+}
+
+function pill(label, val, cls) {
+  return `<div class="stat-pill"><div class="slabel">${label}</div><div class="sval ${cls}">${val}</div></div>`;
+}
+
+function chartOpts(yLabel) {
+  return {
+    responsive:true, maintainAspectRatio:true,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{labels:{color:'#94a3b8',boxWidth:13,font:{size:11}}},
+      tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,
+        titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+        callbacks:{label:c=>' '+c.dataset.label+': $'+c.parsed.y.toFixed(2)}}
+    },
+    scales:{
+      x:{type:'category',
+         grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},
+           callback:function(val,i){
+             // Show label every ~4th point to avoid crowding, always show first/last
+             const lbl = this.getLabelForValue(val);
+             if(!lbl) return '';
+             const parts = lbl.split('-');
+             const short = (parts[1]||'') + '/' + (parts[2]||'');
+             return (i % 4 === 0) ? short : '';
+           }
+         }},
+      y:{grid:{color:'#2a2d3e'},
+         ticks:{color:'#64748b',font:{size:11},callback:v=>'$'+v.toFixed(2)},
+         title:{display:true,text:yLabel,color:'#64748b',font:{size:11}}}
+    }
+  };
+}
+
+function buildCornChart(txns) {
+  if (cornChart) cornChart.destroy();
+  const ctx = document.getElementById('corn-chart').getContext('2d');
+  const bri = txns.map(t=>({x:t.dateStr,y:t.ourPrice}));
+  const mkt = txns.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+  const ds = [{
+    label:'BRI Purchase $/bu', data:bri,
+    borderColor:'#3b82f6', backgroundColor:'#3b82f633',
+    pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2
+  }];
+  if (mkt.length) {
+    ds.push({label:'Alliance Elevator Bid',data:mkt,
+      borderColor:'#94a3b8',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+    updateBadge('corn-badge', bri, mkt, '/bu');
+  }
+  cornChart = new Chart(ctx, {type:'line', data:{datasets:ds}, options:chartOpts('$/bu')});
+}
+
+function buildHayChart(alfa, grass) {
+  if (hayChart) hayChart.destroy();
+  const ctx = document.getElementById('hay-chart').getContext('2d');
+  const ds = [];
+  if (alfa.length) {
+    ds.push({label:'Alfalfa $/ton',data:alfa.map(t=>({x:t.dateStr,y:t.ourPrice})),
+      borderColor:'#10b981',backgroundColor:'#10b98133',
+      pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2});
+    const am = alfa.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+    if (am.length) ds.push({label:'USDA Alfalfa',data:am,
+      borderColor:'#6ee7b7',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+  }
+  if (grass.length) {
+    ds.push({label:'Grass $/ton',data:grass.map(t=>({x:t.dateStr,y:t.ourPrice})),
+      borderColor:'#f59e0b',backgroundColor:'#f59e0b33',
+      pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2});
+    const gm = grass.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+    if (gm.length) ds.push({label:'USDA Grass',data:gm,
+      borderColor:'#fcd34d',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+  }
+  hayChart = new Chart(ctx, {type:'line', data:{datasets:ds}, options:chartOpts('$/ton')});
+  if (alfa.some(t=>t.mktPrice)||grass.some(t=>t.mktPrice)) {
+    const allBRI = [...alfa,...grass].map(t=>t.ourPrice);
+    const allMkt = [...alfa,...grass].filter(t=>t.mktPrice).map(t=>t.mktPrice);
+    updateBadge('hay-badge',allBRI.map(y=>({y})),allMkt.map(y=>({y})),'/ton');
+  }
+}
+
+function buildWdgChart(txns) {
+  if (wdgChart) wdgChart.destroy();
+  if (!txns.length) return;
+  const ctx = document.getElementById('wdg-chart').getContext('2d');
+  const bri = txns.map(t=>({x:t.dateStr,y:t.ourPrice}));
+  const mkt = txns.filter(t=>t.mktPrice).map(t=>({x:t.dateStr,y:t.mktPrice}));
+  const ds = [{
+    label:'BRI Delivered $/ton', data:bri,
+    borderColor:'#a78bfa', backgroundColor:'#a78bfa33',
+    pointRadius:5,pointHoverRadius:7,tension:.3,fill:false,borderWidth:2
+  }];
+  if (mkt.length) {
+    ds.push({label:'USDA NE FOB Plant $/ton',data:mkt,
+      borderColor:'#94a3b8',backgroundColor:'transparent',
+      pointRadius:3,borderDash:[6,3],tension:.3,fill:false,borderWidth:2});
+    updateBadge('wdg-badge', bri, mkt, '/ton');
+  }
+  wdgChart = new Chart(ctx, {type:'line', data:{datasets:ds}, options:chartOpts('$/ton')});
+}
+
+function updateBadge(id, bri, mkt, unit) {
+  if (!bri.length || !mkt.length) return;
+  const ab = avg(bri.slice(-4).map(p=>p.y||p));
+  const am = avg(mkt.slice(-4).map(p=>p.y||p));
+  const diff = ab - am;
+  const el = document.getElementById(id);
+  if (diff < -0.02) {
+    el.textContent = '▼ $'+Math.abs(diff).toFixed(2)+' below market';
+    el.className = 'badge badge-green';
+  } else if (diff > 0.02) {
+    el.textContent = '▲ $'+Math.abs(diff).toFixed(2)+' above market';
+    el.className = 'badge badge-red';
+  } else {
+    el.textContent = 'At market';
+    el.className = 'badge badge-neutral';
+  }
+}
+
+function renderTable(txns, filter) {
+  const list = filter==='all' ? txns : txns.filter(t=>t.type===filter);
+  const tbody = document.getElementById('txn-body');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No transactions</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(t => {
+    const mktStr = t.mktPrice ? '$'+t.mktPrice.toFixed(2) : '<span class="vs-na">—</span>';
+    let vsDiff='<span class="vs-na">—</span>', impact='<span class="vs-na">—</span>';
+    if (t.mktPrice) {
+      const d = t.ourPrice - t.mktPrice;
+      const cls = d<=0 ? 'vs-below' : 'vs-above';
+      vsDiff = `<span class="${cls}">${d<=0?'▼':'▲'} $${Math.abs(d).toFixed(2)}</span>`;
+      const qty = t.type==='corn' ? t.rawQty/56 : t.rawQty/2000;
+      const imp = -d * qty;
+      impact = `<span class="${imp>=0?'vs-below':'vs-above'}">$${Math.abs(imp).toLocaleString('en-US',{maximumFractionDigits:0})}</span>`;
+    }
+    const icon = t.type==='corn'?'🌽':t.type==='alfalfa'?'🌿':'🌾';
+    return `<tr>
+      <td>${t.dateStr}</td>
+      <td>${icon} ${t.product}</td>
+      <td>${t.vendor||'—'}</td>
+      <td>${t.qty}</td>
+      <td><strong>$${t.ourPrice.toFixed(2)}</strong> <span style="color:var(--muted);font-size:.75rem">${t.unit}</span></td>
+      <td>${mktStr}</td>
+      <td>${vsDiff}</td>
+      <td>${impact}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// SAVE FOR SHARING
+// Exports parsed transactions as rm_transactions.json
+// Upload that file to docs/ in your GitHub repo —
+// executives will then see the data without uploading anything
+// ══════════════════════════════════════════════════════
+function saveShared() {
+  if (!allTxns.length) {
+    alert('No data loaded yet — upload a Centerpoint file first.');
+    return;
+  }
+  // Strip dateObj (not serializable) and mktPrice (re-computed on load)
+  const clean = allTxns.map(({ dateObj, mktPrice, ...rest }) => rest);
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Feed & Medicine RM Inventory',
+    transactions: clean,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rm_transactions.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setTimeout(() => alert(
+    'rm_transactions.json downloaded.\n\n' +
+    'Upload it to your GitHub repo at:\n' +
+    '  docs/rm_transactions.json\n\n' +
+    'After that, anyone who visits the dashboard will see\n' +
+    'this data automatically after entering the password — no upload needed.'
+  ), 300);
+}
+
+// ══════════════════════════════════════════════════════
+// INVENTORY TAB — namespaced code
+// ══════════════════════════════════════════════════════
+// ── CLASS COLORS ──────────────────────────────────────────────────────────────
+const CLASS_COLORS = {
+  'Prog Feeders':                  '#3b82f6',
+  'Progenco Calves':               '#6366f1',
+  'Prog Steers':                   '#8b5cf6',
+  'Prog Donors (Hfrs)':            '#a78bfa',
+  'Commercial Feeders':            '#10b981',
+  'Commercial Steers - Stockers':  '#34d399',
+  'Commercial Heifers - Stockers': '#6ee7b7',
+  'Commercial Bred Cows':          '#f59e0b',
+  'Commercial Open-Breeding Cows': '#fbbf24',
+  'Commercial Pairs':              '#fcd34d',
+  'ET Cows (bred)':                '#f97316',
+  'BRI/Wulf Feeders':              '#ef4444',
+  'BRI/Wulf Stockers':             '#f87171',
+  'Angus x Hol Feeders':           '#ec4899',
+  'Angus x Hol Heifers':           '#f472b6',
+  'Bulls':                         '#64748b',
+};
+function classColor(c) { return CLASS_COLORS[c] || '#94a3b8'; }
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let invAllTxns = [];
+let invAvailableMonths = [];   // sorted array of {year, month, label} objects
+let invMonthIdx = 0;           // index into availableMonths for selected month-end
+let invActiveView = 'location';
+let invActiveClasses = new Set();
+let invSortCol = 0, invSortAsc = false;
+let invMainChart = null;
+let invExpandedRows = new Set();
+
+// ── FILE UPLOAD ───────────────────────────────────────────────────────────────
+const invDz = document.getElementById('inv-drop-zone');
+const invFi = document.getElementById('inv-fi');
+invDz.addEventListener('dragover', e => { e.preventDefault(); invDz.classList.add('drag-over'); });
+invDz.addEventListener('dragleave', () => invDz.classList.remove('drag-over'));
+invDz.addEventListener('drop', e => { e.preventDefault(); invDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) processFile(f); });
+invFi.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
+
+function invProcessFile(file) {
+  document.getElementById('inv-file-info').textContent = 'Parsing ' + file.name + '…';
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null });
+      invAllTxns = parseInventory(rows);
+      document.getElementById('inv-file-info').textContent = '✓ ' + file.name + ' — ' + invAllTxns.length + ' transactions';
+      invDz.classList.add('loaded');
+      invInitDashboard();
+    } catch(err) {
+      document.getElementById('inv-file-info').textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+  };
+  r.readAsArrayBuffer(file);
+}
+
+// ── PARSE ─────────────────────────────────────────────────────────────────────
+function toDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (typeof d === 'string') return new Date(d);
+  if (typeof d === 'number') {
+    const epoch = new Date(1899, 11, 30);
+    epoch.setDate(epoch.getDate() + Math.floor(d));
+    return epoch;
+  }
+  return null;
+}
+
+function parseInventory(rows) {
+  const txns = [];
+  const SKIP_SECTIONS = ['fmv adj'];
+  let inSkip = false;
+
+  for (const raw of rows) {
+    const row = Array.from({length:15}, (_,i) => raw[i] ?? null);
+    if (row[1] && typeof row[1] === 'string' && row[1].trim() && !row[2]) {
+      inSkip = SKIP_SECTIONS.some(s => row[1].trim().toLowerCase().includes(s));
+      continue;
+    }
+    if (inSkip) continue;
+
+    const date = toDate(row[2]);
+    const qty = row[6];
+    const profitCenter = row[9] ? String(row[9]).trim() : null;
+    const prodCenter   = row[10] ? String(row[10]).trim() : null;
+    const prodDetail   = row[11] ? String(row[11]).trim() : null;
+
+    if (!date || qty == null || !profitCenter || !prodCenter) continue;
+    if (typeof qty !== 'number' || qty === 0) continue;
+    if (profitCenter === 'Profit Center' || prodCenter === 'Production Center') continue;
+
+    txns.push({
+      date, qty,
+      amount: row[8] || 0,
+      class: profitCenter,
+      location: prodCenter,
+      lot: prodDetail || '',
+    });
+  }
+  return txns;
+}
+
+// ── MONTH SETUP ───────────────────────────────────────────────────────────────
+function buildAvailableMonths(txns) {
+  const seen = new Set();
+  txns.forEach(t => {
+    const key = t.date.getFullYear() + '-' + String(t.date.getMonth()+1).padStart(2,'0');
+    seen.add(key);
+  });
+  const months = [...seen].sort();
+  return months.map(k => {
+    const [y, m] = k.split('-').map(Number);
+    const monthEnd = new Date(y, m, 0); // last day of that month
+    const label = monthEnd.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+    return { year:y, month:m, monthEnd, label };
+  });
+}
+
+function selectedMonthEnd() { return invAvailableMonths[invMonthIdx].monthEnd; }
+function selectedMonthStart() {
+  const m = invAvailableMonths[invMonthIdx];
+  return new Date(m.year, m.month - 1, 1);
+}
+
+document.getElementById('inv-prev-month').onclick = () => {
+  if (invMonthIdx > 0) { invMonthIdx--; invExpandedRows.clear(); invRenderAll(); }
+};
+document.getElementById('inv-next-month').onclick = () => {
+  if (invMonthIdx < invAvailableMonths.length - 1) { invMonthIdx++; invExpandedRows.clear(); invRenderAll(); }
+};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function invInitDashboard() {
+  availableMonths = buildAvailableMonths(invAllTxns);
+  invMonthIdx = invAvailableMonths.length - 1; // default to latest
+
+  const allClasses = [...new Set(invAllTxns.map(t => t.class))].sort();
+  allClasses.forEach(c => invActiveClasses.add(c));
+
+  document.getElementById('inv-empty-state').style.display = 'none';
+  document.getElementById('inv-dashboard').style.display = 'block';
+
+  invBuildClassChips(allClasses);
+  invRenderAll();
+}
+
+// ── CLASS CHIPS ───────────────────────────────────────────────────────────────
+function invBuildClassChips(classes) {
+  const container = document.getElementById('inv-class-chips');
+  container.innerHTML = '';
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'class-chip';
+  const allActive = invActiveClasses.size === classes.length;
+  allBtn.style.cssText = `border-color:var(--muted);color:${allActive?'#fff':'var(--muted)'};background:${allActive?'var(--muted)':'none'}`;
+  allBtn.innerHTML = 'All';
+  allBtn.onclick = () => {
+    if (invActiveClasses.size === classes.length) invActiveClasses.clear();
+    else classes.forEach(c => invActiveClasses.add(c));
+    invRenderAll();
+  };
+  container.appendChild(allBtn);
+
+  classes.forEach(cls => {
+    const on = invActiveClasses.has(cls);
+    const col = classColor(cls);
+    const btn = document.createElement('button');
+    btn.className = 'class-chip';
+    btn.style.cssText = `border-color:${col};color:${on?'#fff':col};background:${on?col:'none'}`;
+    btn.innerHTML = `<span class="class-dot" style="background:${on?'rgba(255,255,255,.7)':col}"></span>${cls}`;
+    btn.onclick = () => {
+      if (invActiveClasses.has(cls)) invActiveClasses.delete(cls);
+      else invActiveClasses.add(cls);
+      invRenderAll();
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ── VIEW TOGGLES ──────────────────────────────────────────────────────────────
+document.querySelectorAll('#tab-inventory .toggle-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('#tab-inventory .toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    invActiveView = btn.dataset.view;
+    invExpandedRows.clear();
+    invRenderAll();
+  };
+});
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function invRenderAll() {
+  // Update month label
+  document.getElementById('inv-month-label').textContent = invAvailableMonths[invMonthIdx].label;
+  document.getElementById('inv-prev-month').disabled = invMonthIdx === 0;
+  document.getElementById('inv-next-month').disabled = invMonthIdx === invAvailableMonths.length - 1;
+
+  const filtered = invAllTxns.filter(t => invActiveClasses.has(t.class));
+  const monthEnd = selectedMonthEnd();
+  const monthStart = selectedMonthStart();
+
+  // Net head as of month-end
+  const hdSnapshot = computeNetHead(filtered, monthEnd);
+  // Head days accrued during the selected month only
+  const hdMonth = computeMonthHeadDays(filtered, monthStart, monthEnd);
+
+  const allClasses = [...new Set(invAllTxns.map(t => t.class))].sort();
+  invBuildClassChips(allClasses);
+
+  invRenderStats(hdSnapshot, hdMonth, monthEnd);
+  invRenderChart(hdSnapshot);
+  invRenderTable(hdSnapshot, hdMonth);
+}
+
+// ── HEAD CALCULATION ──────────────────────────────────────────────────────────
+// Net head per (location, class) as of a given date
+function computeNetHead(txns, asOf) {
+  const map = {};
+  for (const t of txns) {
+    if (t.date > asOf) continue;
+    const key = t.location + '|||' + t.class + '|||' + t.lot;
+    if (!map[key]) map[key] = { netHead:0, location:t.location, class:t.class, lot:t.lot, totalIn:0, firstIn:null };
+    map[key].netHead += t.qty;
+    if (t.qty > 0) {
+      map[key].totalIn += t.qty;
+      if (!map[key].firstIn || t.date < map[key].firstIn) map[key].firstIn = t.date;
+    }
+  }
+  // Round fractional heads
+  Object.values(map).forEach(e => { e.netHead = Math.round(e.netHead); });
+  return map;
+}
+
+// Head days that accrued WITHIN [monthStart, monthEnd] inclusive
+function computeMonthHeadDays(txns, monthStart, monthEnd) {
+  // Group by lot key
+  const groups = {};
+  for (const t of txns) {
+    const key = t.location + '|||' + t.class + '|||' + t.lot;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(t);
+  }
+
+  const result = {}; // key -> headDays for this month
+  for (const [key, events] of Object.entries(groups)) {
+    events.sort((a,b) => a.date - b.date);
+
+    // Build timeline of (date, qty_change) events, clipped to relevant range
+    // We need balance at start of month
+    let balanceAtStart = 0;
+    for (const e of events) {
+      if (e.date < monthStart) balanceAtStart += e.qty;
+    }
+
+    // Events within or at the month boundary
+    const monthEvents = events.filter(e => e.date >= monthStart && e.date <= monthEnd);
+
+    let balance = balanceAtStart;
+    let prevDate = monthStart;
+    let headDays = 0;
+
+    for (const e of monthEvents) {
+      const days = (e.date - prevDate) / 86400000;
+      headDays += Math.max(0, balance) * days;
+      balance += e.qty;
+      prevDate = e.date;
+    }
+
+    // Final period to end of month
+    const finalDays = (monthEnd - prevDate) / 86400000 + 1; // +1 to include month-end day
+    headDays += Math.max(0, balance) * finalDays;
+
+    if (headDays > 0) result[key] = Math.round(headDays);
+  }
+  return result;
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function invRenderStats(hdSnapshot, hdMonth, monthEnd) {
+  const entries = Object.values(hdSnapshot).filter(e => e.netHead > 0);
+  const totalHead = entries.reduce((s,e) => s + e.netHead, 0);
+  const totalHD = Object.values(hdMonth).reduce((s,v) => s + v, 0);
+  const activeLocs = new Set(entries.map(e => e.location)).size;
+  const activeClsCnt = new Set(entries.map(e => e.class)).size;
+  const monthName = monthEnd.toLocaleDateString('en-US', { month:'short', year:'numeric' });
+
+  document.getElementById('inv-stat-bar').innerHTML = [
+    invPill('Head at Month-End', totalHead.toLocaleString(), 'blue'),
+    invPill('Active Locations', activeLocs, ''),
+    invPill('Classes', activeClsCnt, ''),
+    invPill(monthName + ' Head Days', Math.round(totalHD).toLocaleString(), 'amber'),
+  ].join('');
+}
+function invPill(l,v,c){ return `<div class="stat-pill"><div class="slabel">${l}</div><div class="sval ${c}">${v}</div></div>`; }
+
+// ── CHART ─────────────────────────────────────────────────────────────────────
+function invRenderChart(hdSnapshot) {
+  const entries = Object.values(hdSnapshot).filter(e => e.netHead > 0);
+  const classes = [...new Set(entries.map(e => e.class))].sort();
+  let labels, datasets;
+
+  if (invActiveView === 'location') {
+    const locs = [...new Set(entries.map(e => e.location))];
+    locs.sort((a,b) => {
+      const aH = entries.filter(e=>e.location===a).reduce((s,e)=>s+e.netHead,0);
+      const bH = entries.filter(e=>e.location===b).reduce((s,e)=>s+e.netHead,0);
+      return bH - aH;
+    });
+    labels = locs;
+    datasets = classes.map(cls => ({
+      label: cls,
+      data: locs.map(loc => entries.filter(e=>e.location===loc&&e.class===cls).reduce((s,e)=>s+e.netHead,0)),
+      backgroundColor: classColor(cls)+'cc', borderColor: classColor(cls), borderWidth:1, borderRadius:3,
+    }));
+    document.getElementById('inv-chart-title').textContent = 'Head by Location';
+    document.getElementById('inv-chart-sub').textContent = 'Stacked by class — net head at month-end';
+  } else if (invActiveView === 'class') {
+    const sorted = [...classes].sort((a,b)=>{
+      return entries.filter(e=>e.class===b).reduce((s,e)=>s+e.netHead,0)
+           - entries.filter(e=>e.class===a).reduce((s,e)=>s+e.netHead,0);
+    });
+    labels = sorted;
+    datasets = [{ label:'Net Head', data:sorted.map(c=>entries.filter(e=>e.class===c).reduce((s,e)=>s+e.netHead,0)),
+      backgroundColor:sorted.map(c=>classColor(c)+'cc'), borderColor:sorted.map(c=>classColor(c)), borderWidth:1, borderRadius:3 }];
+    document.getElementById('inv-chart-title').textContent = 'Head by Class';
+    document.getElementById('inv-chart-sub').textContent = 'Net head at month-end per class';
+  } else {
+    const lotGroups = {};
+    entries.forEach(e => {
+      const k = e.lot || e.location+' / '+e.class;
+      if (!lotGroups[k]) lotGroups[k] = 0;
+      lotGroups[k] += e.netHead;
+    });
+    const sorted = Object.entries(lotGroups).sort((a,b)=>b[1]-a[1]).slice(0,25);
+    labels = sorted.map(([k])=>k.length>32?k.slice(0,30)+'…':k);
+    datasets = [{ label:'Net Head', data:sorted.map(([,v])=>v),
+      backgroundColor:'#3b82f6cc', borderColor:'#3b82f6', borderWidth:1, borderRadius:3 }];
+    document.getElementById('inv-chart-title').textContent = 'Head by Lot (Top 25)';
+    document.getElementById('inv-chart-sub').textContent = 'Net head at month-end per lot/group';
+  }
+
+  if (invMainChart) invMainChart.destroy();
+  const ctx = document.getElementById('inv-main-chart').getContext('2d');
+  invMainChart = new Chart(ctx, {
+    type:'bar', data:{ labels, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{ display:invActiveView==='location', labels:{color:'#94a3b8',boxWidth:11,font:{size:10},padding:10} },
+        tooltip:{ backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y.toLocaleString()+' hd'} }
+      },
+      scales:{
+        x:{ stacked:invActiveView==='location', grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},maxRotation:35} },
+        y:{ stacked:invActiveView==='location', grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},callback:v=>v.toLocaleString()} }
+      }
+    }
+  });
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────────
+const COL_DEFS = {
+  location:[
+    {label:'Location',key:'location'},{label:'Classes',key:'classCount',num:true},
+    {label:'Head',key:'netHead',num:true},{label:'Month Head Days',key:'headDays',num:true},
+    {label:'% of Total',key:'pctStr'},
+  ],
+  class:[
+    {label:'Class',key:'class'},{label:'Head',key:'netHead',num:true},
+    {label:'Month Head Days',key:'headDays',num:true},{label:'Locations',key:'locCount',num:true},
+    {label:'% of Total',key:'pctStr'},
+  ],
+  lot:[
+    {label:'Lot / Group',key:'lot'},{label:'Location',key:'location'},{label:'Class',key:'class'},
+    {label:'Head',key:'netHead',num:true},{label:'Month Head Days',key:'headDays',num:true},
+    {label:'% of Total',key:'pctStr'},
+  ],
+};
+
+function invRenderTable(hdSnapshot, hdMonth) {
+  const entries = Object.values(hdSnapshot);
+  const cols = COL_DEFS[invActiveView];
+  const totalHead = entries.filter(e=>e.netHead>0).reduce((s,e)=>s+e.netHead,0);
+
+  // Attach head days to each entry
+  Object.keys(hdSnapshot).forEach(k => {
+    hdSnapshot[k].monthHD = hdMonth[k] || 0;
+  });
+
+  let rows = [];
+
+  if (invActiveView === 'location') {
+    const locMap = {};
+    entries.forEach(e => {
+      if (!locMap[e.location]) locMap[e.location] = [];
+      locMap[e.location].push(e);
+    });
+    rows = Object.entries(locMap).map(([loc, items]) => {
+      const netHead = items.reduce((s,e)=>s+e.netHead,0);
+      const headDays = items.reduce((s,e)=>s+e.monthHD,0);
+      return { location:loc, classCount:new Set(items.filter(e=>e.netHead>0).map(e=>e.class)).size,
+        netHead, headDays, pct:totalHead>0?netHead/totalHead:0, children:items };
+    });
+  } else if (invActiveView === 'class') {
+    const clsMap = {};
+    entries.forEach(e => {
+      if (!clsMap[e.class]) clsMap[e.class] = [];
+      clsMap[e.class].push(e);
+    });
+    rows = Object.entries(clsMap).map(([cls, items]) => {
+      const netHead = items.reduce((s,e)=>s+e.netHead,0);
+      const headDays = items.reduce((s,e)=>s+e.monthHD,0);
+      return { class:cls, netHead, headDays, locCount:new Set(items.filter(e=>e.netHead>0).map(e=>e.location)).size,
+        pct:totalHead>0?netHead/totalHead:0 };
+    });
+  } else {
+    rows = entries.map(e => ({ ...e, headDays:e.monthHD, pct:totalHead>0?e.netHead/totalHead:0 }));
+  }
+
+  // Add pctStr to each row
+  rows.forEach(r => { r.pctStr = (r.pct*100).toFixed(1)+'%'; });
+
+  // Sort
+  rows.sort((a,b)=>{
+    const col = cols[invSortCol]?.key || 'netHead';
+    const av = a[col]??'', bv = b[col]??'';
+    const cmp = typeof av==='number'?av-bv:String(av).localeCompare(String(bv));
+    return invSortAsc?cmp:-cmp;
+  });
+
+  // Header
+  document.getElementById('inv-table-head').innerHTML =
+    cols.map((c,i)=>`<th class="${invSortCol===i?'sorted':''}" onclick="invSetSort(${i})">${c.label}<span class="sort-icon">${invSortCol===i?(invSortAsc?'▲':'▼'):'↕'}</span></th>`).join('');
+
+  // Body
+  const maxPct = Math.max(...rows.map(r=>r.pct));
+  const html = [];
+
+  rows.forEach((row, ri) => {
+    const isExpanded = invExpandedRows.has(ri);
+    const hasChildren = row.children && row.children.length > 0;
+    const barW = maxPct > 0 ? Math.round((row.pct/maxPct)*100) : 0;
+    const barColor = invActiveView==='class' ? classColor(row.class) : 'var(--accent)';
+
+    html.push(`<tr class="${hasChildren?'expandable':''}" onclick="${hasChildren?`invToggleRow(${ri})`:''}">`);
+    cols.forEach((c,ci) => {
+      let val = row[c.key] ?? '—';
+      if (c.num && typeof val==='number') val = val.toLocaleString();
+      if (c.key==='pctStr') {
+        html.push(`<td><div class="bar-cell"><div class="mini-bar" style="width:${barW}px;background:${barColor}"></div><span class="num" style="color:var(--muted);font-size:.78rem">${val}</span></div></td>`);
+      } else if (ci===0 && hasChildren) {
+        html.push(`<td><span class="expand-icon">${isExpanded?'▼':'▶'}</span><strong>${val}</strong></td>`);
+      } else if (c.key==='class' && invActiveView!=='location') {
+        html.push(`<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${classColor(row.class)};margin-right:7px"></span>${val}</td>`);
+      } else {
+        html.push(`<td class="${c.num?'num':''}">${val}</td>`);
+      }
+    });
+    html.push('</tr>');
+
+    if (isExpanded && hasChildren) {
+      [...row.children].filter(c=>c.netHead!==0).sort((a,b)=>b.netHead-a.netHead).forEach(child => {
+        html.push(`<tr class="sub-row"><td><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${classColor(child.class)};margin-right:7px"></span>${child.class}</td>`);
+        if (invActiveView==='location') {
+          html.push(`<td class="num">${child.netHead.toLocaleString()}</td>`);
+          html.push(`<td class="num">${(child.monthHD||0).toLocaleString()}</td>`);
+          html.push(`<td>${(child.netHead/totalHead*100).toFixed(1)}%</td>`);
+        }
+        html.push('</tr>');
+      });
+    }
+  });
+
+  document.getElementById('inv-table-body').innerHTML = html.join('');
+}
+
+function invToggleRow(ri) {
+  if (invExpandedRows.has(ri)) invExpandedRows.delete(ri);
+  else invExpandedRows.add(ri);
+  const filtered = invAllTxns.filter(t => invActiveClasses.has(t.class));
+  const monthEnd = selectedMonthEnd();
+  const monthStart = selectedMonthStart();
+  const hdSnapshot = computeNetHead(filtered, monthEnd);
+  const hdMonth = computeMonthHeadDays(filtered, monthStart, monthEnd);
+  invRenderTable(hdSnapshot, hdMonth);
+}
+
+function invSetSort(col) {
+  if (invSortCol===col) invSortAsc=!invSortAsc; else { invSortCol=col; invSortAsc=false; }
+  invExpandedRows.clear();
+  const filtered = invAllTxns.filter(t => invActiveClasses.has(t.class));
+  const monthEnd = selectedMonthEnd();
+  const monthStart = selectedMonthStart();
+  const hdSnapshot = computeNetHead(filtered, monthEnd);
+  const hdMonth = computeMonthHeadDays(filtered, monthStart, monthEnd);
+  invRenderTable(hdSnapshot, hdMonth);
+}
+
+// ── SAVE FOR SHARING ──────────────────────────────────────────────────────────
+function invSaveShared() {
+  if (!invAllTxns.length) { alert('No data loaded yet — upload a Centerpoint file first.'); return; }
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Cattle Inventory',
+    transactions: invAllTxns.map(t => ({
+      date: t.date.toISOString().split('T')[0],
+      qty: t.qty, amount: t.amount,
+      class: t.class, location: t.location, lot: t.lot,
+    })),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cattle_inventory.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setTimeout(() => alert(
+    'cattle_inventory.json downloaded.\n\n' +
+    'Upload it to your GitHub repo at:\n' +
+    '  docs/cattle_inventory.json\n\n' +
+    'Executives will then see the data automatically\n' +
+    'after visiting the page — no file upload needed.'
+  ), 300);
+}
+
+// ── AUTO-LOAD SHARED DATA ─────────────────────────────────────────────────────
+async function invTryLoadShared() {
+  try {
+    const r = await fetch('./cattle_inventory.json?' + Date.now());
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.transactions || !data.transactions.length) return;
+    invAllTxns = data.transactions.map(t => ({
+      date: new Date(t.date),
+      qty: t.qty, amount: t.amount || 0,
+      class: t.class, location: t.location, lot: t.lot || '',
+    }));
+    document.getElementById('inv-file-info').textContent =
+      '✓ Shared data loaded — ' + data.source + ' (' + data.generated + ')';
+    document.getElementById('inv-drop-zone').classList.add('loaded');
+    invInitDashboard();
+  } catch { /* no shared file — wait for upload */ }
+}
+invTryLoadShared();
+</script>
+</body>
+</html>
