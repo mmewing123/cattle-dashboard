@@ -1948,6 +1948,7 @@ function psSaveShared() {
     purchases: psAllPurchases.map(t => ({...t, date: t.dateStr})),
     sales: psAllSales.map(t => ({...t, date: t.dateStr})),
     invTxnMap: Object.keys(psInvTxnMap).length ? psInvTxnMap : undefined,
+    deathsByClass: Object.keys(psDeathsByClass).length ? psDeathsByClass : undefined,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
@@ -1974,6 +1975,9 @@ async function psTryLoadShared() {
       psInvTxnMap = data.invTxnMap;
       document.getElementById('ps-inv-info').textContent = '✓ Class data loaded from shared file';
       document.getElementById('ps-inv-drop').classList.add('loaded');
+    }
+    if (data.deathsByClass) {
+      psDeathsByClass = data.deathsByClass;
     }
     document.getElementById('ps-purchase-info').textContent = '✓ Shared data loaded (' + data.generated + ')';
     document.getElementById('ps-sale-info').textContent = '✓ Shared data loaded';
