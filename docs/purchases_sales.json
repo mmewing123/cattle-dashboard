@@ -39719,5 +39719,23 @@
         "qty": -1
       }
     ]
+  },
+  "deathsByClass": {
+    "Commercial Steers - Stockers": 906,
+    "BRI/Wulf Stockers": 116,
+    "Progenco Calves": 935,
+    "Prog Donors (Hfrs)": 128,
+    "Prog Steers": 622,
+    "Prog Feeders": 241,
+    "Commercial Heifers - Stockers": 509,
+    "Commercial Feeders": 107,
+    "BRI/Wulf Feeders": 6,
+    "Commercial Bred Cows": 186,
+    "Angus x Hol Heifers": 18,
+    "Commercial Open-Breeding Cows": 88,
+    "ET Cows (bred)": 7,
+    "Bulls": 2,
+    "Commercial Pairs": 3,
+    "Angus x Hol Feeders": 2
   }
 }
