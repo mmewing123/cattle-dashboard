@@ -212,6 +212,105 @@ tr:hover td{background:rgba(59,130,246,.03);}
     cursor:pointer;font-size:.74rem;font-weight:600;transition:all .15s;}
 
 
+
+  /* ══════════════════════════════════════════════════════
+     MOBILE RESPONSIVE  (≤ 640px phones, ≤ 900px tablets)
+     ══════════════════════════════════════════════════════ */
+  @media(max-width:900px) {
+    /* Top bar: stack brand above tabs, hide lock text */
+    .top-bar{flex-wrap:wrap;gap:8px;padding:12px 16px;}
+    .tab-nav{order:3;width:100%;overflow-x:auto;padding-bottom:2px;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .tab-nav::-webkit-scrollbar{display:none;}
+    .tab-btn{white-space:nowrap;padding:6px 14px;font-size:.78rem;}
+    .lock-btn{padding:5px 10px;font-size:.75rem;}
+
+    /* Content padding */
+    .content{padding:16px;}
+
+    /* Gate card */
+    .gate-card{width:92vw;padding:32px 24px;}
+
+    /* Stat pills: shrink a bit */
+    .stat-pill{padding:10px 14px;}
+    .stat-pill .sval{font-size:1.05rem;}
+    .stat-pill .slabel{font-size:.65rem;}
+
+    /* Charts: reduce height */
+    canvas{max-height:220px!important;}
+
+    /* Upload zones */
+    .upload-zone{padding:28px 16px;}
+    .inv-upload-zone{padding:24px 16px;}
+    .ps-upload-zone{padding:20px 12px;}
+
+    /* Controls panel */
+    .ctrl-row{gap:10px;}
+    .ctrl-label{width:60px;font-size:.68rem;}
+    .month-label{min-width:100px;font-size:.85rem;}
+
+    /* Tables: tighter padding */
+    td{padding:7px 10px;}
+    th{padding:7px 10px;font-size:.65rem;}
+
+    /* Table head row with save button */
+    .table-head-row{flex-wrap:wrap;gap:8px;padding:12px 14px;font-size:.83rem;}
+  }
+
+  @media(max-width:640px) {
+    /* Stack brand and lock on same row, tabs below */
+    .brand{font-size:.95rem;}
+
+    /* Stat bar: 2 columns on phone */
+    .stat-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+    /* Chart grid already 1-col at 900, keep */
+
+    /* PS upload row already 1-col at 900 */
+
+    /* Conc grid already 1-col at 900 */
+
+    /* RM chart grid */
+    .chart-grid{grid-template-columns:1fr!important;}
+
+    /* Inventory controls: wrap month + view onto separate lines */
+    .ctrl-row{flex-direction:column;align-items:flex-start;}
+    .ctrl-label{width:auto;margin-bottom:2px;}
+
+    /* Class chips: smaller */
+    .class-chip{font-size:.68rem;padding:3px 8px;}
+
+    /* Gate card full width */
+    .gate-card{width:96vw;padding:28px 18px;}
+
+    /* Tables allow horizontal scroll — already have overflow-x:auto on .table-wrap */
+    /* Make font a touch smaller on very small screens */
+    table{font-size:.76rem;}
+    td{padding:6px 8px;}
+    th{padding:6px 8px;}
+
+    /* Upload zone text */
+    .upload-title{font-size:.9rem;}
+    .upload-sub{font-size:.78rem;}
+  }
+
+
+  /* AP & FREIGHT TAB */
+  .ap-upload-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+  @media(max-width:700px){.ap-upload-row{grid-template-columns:1fr;}}
+  .ap-upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;
+    cursor:pointer;background:var(--surface);transition:all .2s;}
+  .ap-upload-zone.drag-over{border-color:var(--accent);background:rgba(59,130,246,.05);}
+  .ap-upload-zone.loaded{border-color:var(--accent2);border-style:solid;padding:14px 28px;}
+  .ap-upload-zone.loaded .upload-icon,.ap-upload-zone.loaded .upload-title,.ap-upload-zone.loaded .upload-sub{display:none;}
+  .ap-upload-zone.aging-zone{border-color:rgba(245,158,11,.3);}
+  .ap-upload-zone.aging-zone.loaded{border-color:var(--accent3);}
+  .ap-upload-zone.freight-zone{border-color:rgba(167,139,250,.3);}
+  .ap-upload-zone.freight-zone.loaded{border-color:#a78bfa;}
+  .ap-info{margin-top:6px;font-size:.82rem;color:var(--accent2);font-weight:500;}
+  .ap-section-title{font-size:1rem;font-weight:700;margin-bottom:16px;padding-bottom:10px;
+    border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+
 </style>
 </head>
 <body>
@@ -236,6 +335,9 @@ tr:hover td{background:rgba(59,130,246,.03);}
       <button class="tab-btn active" data-tab="rm">📈 RM Cost vs. Market</button>
       <button class="tab-btn" data-tab="inventory">🐄 Cattle Inventory</button>
       <button class="tab-btn" data-tab="ps">💰 Purchases &amp; Sales</button>
+      <button class="tab-btn" data-tab="ap">📋 AP Aging</button>
+      <button class="tab-btn" data-tab="ar">📬 AR Aging</button>
+      <button class="tab-btn" data-tab="freight">🚚 Freight</button>
     </div>
     <button class="lock-btn" onclick="lock()">🔒 Lock</button>
   </div>
@@ -509,6 +611,156 @@ tr:hover td{background:rgba(59,130,246,.03);}
     </div>
   </div>
 
+
+  <!-- AP AGING TAB -->
+  <div class="tab-pane" id="tab-ap">
+    <div class="content">
+
+      <div class="ap-upload-row" style="grid-template-columns:1fr">
+        <div class="ap-upload-zone aging-zone" id="ap-aging-drop" onclick="document.getElementById('ap-aging-fi').click()">
+          <div class="upload-icon">📋</div>
+          <div class="upload-title">Drop Vendor Aging Export</div>
+          <div class="upload-sub">Centerpoint → Purchases &amp; AP → Vendor Aging</div>
+          <div class="ap-info" id="ap-aging-info"></div>
+          <input type="file" id="ap-aging-fi" accept=".xlsx,.xls" onclick="event.stopPropagation()">
+        </div>
+      </div>
+
+      <div id="ap-dashboard" style="display:none">
+        <div class="ap-section-title">
+          <span>Accounts Payable Aging</span>
+          <button onclick="apSaveShared()" style="background:var(--accent2);border:none;color:#fff;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600">💾 Save for Sharing</button>
+        </div>
+        <div class="stat-bar" id="ap-aging-stats" style="margin-bottom:24px"></div>
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">AP Aging by Vendor — Top 15</div>
+              <div class="chart-sub">Stacked by aging bucket</div>
+            </div>
+          </div>
+          <canvas id="ap-aging-chart" style="max-height:300px"></canvas>
+        </div>
+        <div class="table-card" style="margin-bottom:28px">
+          <div class="table-head-row">Vendor Aging Detail</div>
+          <div class="table-wrap" id="ap-aging-table"></div>
+        </div>
+      </div>
+
+      </div>
+
+      <div class="empty" id="ap-empty">
+        <div class="eicon">📋</div>
+        <p>Upload your Vendor Aging export above.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AR AGING TAB -->
+  <div class="tab-pane" id="tab-ar">
+    <div class="content">
+
+      <div class="ap-upload-row" style="grid-template-columns:1fr">
+        <div class="ap-upload-zone" style="border-color:rgba(99,102,241,.3)" id="ar-aging-drop" onclick="document.getElementById('ar-aging-fi').click()">
+          <div class="upload-icon">📬</div>
+          <div class="upload-title">Drop Customer Aging Export</div>
+          <div class="upload-sub">Centerpoint → Sales &amp; AR → Customer Aging</div>
+          <div class="ap-info" id="ar-aging-info"></div>
+          <input type="file" id="ar-aging-fi" accept=".xlsx,.xls" onclick="event.stopPropagation()">
+        </div>
+      </div>
+
+      <div id="ar-dashboard" style="display:none">
+        <div class="ap-section-title">
+          <span>Accounts Receivable Aging</span>
+          <button onclick="arSaveShared()" style="background:var(--accent2);border:none;color:#fff;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600">💾 Save for Sharing</button>
+        </div>
+        <div class="stat-bar" id="ar-aging-stats" style="margin-bottom:24px"></div>
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">AR Aging by Customer</div>
+              <div class="chart-sub">Stacked by aging bucket</div>
+            </div>
+          </div>
+          <canvas id="ar-aging-chart" style="max-height:280px"></canvas>
+        </div>
+        <div class="table-card" style="margin-bottom:28px">
+          <div class="table-head-row">Customer Aging Detail</div>
+          <div class="table-wrap" id="ar-aging-table"></div>
+        </div>
+      </div>
+
+      <div class="empty" id="ar-empty">
+        <div class="eicon">📬</div>
+        <p>Upload your Customer Aging export above.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FREIGHT TAB -->
+  <div class="tab-pane" id="tab-freight">
+    <div class="content">
+
+      <div class="ap-upload-row" style="grid-template-columns:1fr">
+        <div class="ap-upload-zone freight-zone" id="ap-freight-drop" onclick="document.getElementById('ap-freight-fi').click()">
+          <div class="upload-icon">🚚</div>
+          <div class="upload-title">Drop Purchases by Vendor &amp; Account Export</div>
+          <div class="upload-sub">Centerpoint → Purchases &amp; AP → Purchases by Vendor &amp; Account</div>
+          <div class="ap-info" id="ap-freight-info"></div>
+          <input type="file" id="ap-freight-fi" accept=".xlsx,.xls" onclick="event.stopPropagation()">
+        </div>
+      </div>
+
+      <div id="freight-dashboard" style="display:none">
+        <div class="ap-section-title">
+          <span>Freight &amp; Trucking</span>
+          <button onclick="frSaveShared()" style="background:var(--accent2);border:none;color:#fff;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600">💾 Save for Sharing</button>
+        </div>
+
+        <!-- Year filter buttons -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+          <span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Year</span>
+          <div id="fr-year-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="stat-bar" id="ap-freight-stats" style="margin-bottom:24px"></div>
+        <div class="chart-grid" style="margin-bottom:24px">
+          <div class="chart-card">
+            <div class="chart-head">
+              <div>
+                <div class="chart-title">Monthly Freight Spend</div>
+                <div class="chart-sub">Trucking &amp; Freight WIP by month</div>
+              </div>
+            </div>
+            <canvas id="ap-freight-chart" style="max-height:280px"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <div>
+                <div class="chart-title">Freight by Class</div>
+                <div class="chart-sub">Total freight spend per profit center</div>
+              </div>
+            </div>
+            <canvas id="ap-freight-class-chart" style="max-height:280px"></canvas>
+          </div>
+        </div>
+        <div class="table-card" style="margin-bottom:28px">
+          <div class="table-head-row">Freight Vendors</div>
+          <div class="table-wrap" id="ap-freight-vendor-table"></div>
+        </div>
+      </div>
+
+      <div class="empty" id="freight-empty">
+        <div class="eicon">🚚</div>
+        <p>Upload your Purchases by Vendor &amp; Account export above.</p>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -558,6 +810,8 @@ function onLogin() {
   loadMarketData();   // RM tab — loads market_data.json then tries rm_transactions.json
   invTryLoadShared(); // Inventory tab — tries cattle_inventory.json
   psTryLoadShared();   // PS tab — tries purchases_sales.json
+  apTryLoadShared();    // AP tab — tries ap_freight.json
+  arTryLoadShared();    // AR tab — tries ar_aging.json
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────────────
@@ -570,6 +824,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     // Resize charts when switching to a tab (Chart.js needs this)
     if (btn.dataset.tab === 'inventory' && invMainChart) invMainChart.resize();
     if (btn.dataset.tab === 'ps') { if(psMonthChart) psMonthChart.resize(); if(psPriceChart) psPriceChart.resize(); if(psClassVolChart) psClassVolChart.resize(); }
+    if (btn.dataset.tab === 'ap') { if(apAgingChart) apAgingChart.resize(); }
+    if (btn.dataset.tab === 'ar') { if(arAgingChart) arAgingChart.resize(); }
+    if (btn.dataset.tab === 'freight') { if(apFreightChart) apFreightChart.resize(); if(apFreightClassChart) apFreightClassChart.resize(); }
     if (btn.dataset.tab === 'rm') {
       if (cornChart) cornChart.resize();
       if (hayChart) hayChart.resize();
@@ -2198,6 +2455,665 @@ function psRenderClassTable(buys, sells, classes) {
 }
 
 
+
+
+// ══════════════════════════════════════════════════════
+// AP & FREIGHT TAB
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// AP & FREIGHT TAB
+// ══════════════════════════════════════════════════════
+
+let apAgingData    = [];   // [{vendor, amtDue, current, d30, d60, d90, over90, invoices}]
+let apFreightData  = [];   // [{date, dateStr, month, vendor, profitCenter, location, notation, amount}]
+let apAgingChart   = null;
+let apFreightChart = null;
+let apFreightClassChart = null;
+let apAgingSortCol = 'amtDue', apAgingSortAsc = false;
+let apFreightSortCol = 'amt', apFreightSortAsc = false;
+
+// ── UPLOAD HANDLERS ───────────────────────────────────
+const apAgingDz = document.getElementById('ap-aging-drop');
+const apAgingFi = document.getElementById('ap-aging-fi');
+const apFreightDz = document.getElementById('ap-freight-drop');
+const apFreightFi = document.getElementById('ap-freight-fi');
+
+apAgingDz.addEventListener('dragover', e => { e.preventDefault(); apAgingDz.classList.add('drag-over'); });
+apAgingDz.addEventListener('dragleave', () => apAgingDz.classList.remove('drag-over'));
+apAgingDz.addEventListener('drop', e => { e.preventDefault(); apAgingDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) apParseAging(f); });
+apAgingFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) apParseAging(e.target.files[0]); });
+
+apFreightDz.addEventListener('dragover', e => { e.preventDefault(); apFreightDz.classList.add('drag-over'); });
+apFreightDz.addEventListener('dragleave', () => apFreightDz.classList.remove('drag-over'));
+apFreightDz.addEventListener('drop', e => { e.preventDefault(); apFreightDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) apParseFreight(f); });
+apFreightFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) apParseFreight(e.target.files[0]); });
+
+function apParseAging(file) {
+  document.getElementById('ap-aging-info').textContent = 'Parsing ' + file.name + '…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null });
+      apAgingData = apParseAgingRows(rows);
+      document.getElementById('ap-aging-info').textContent = '✓ ' + file.name + ' — ' + apAgingData.length + ' vendors';
+      apAgingDz.classList.add('loaded');
+      apRenderAll();
+    } catch(err) { document.getElementById('ap-aging-info').textContent = 'Error: ' + err.message; console.error(err); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function apParseFreight(file) {
+  document.getElementById('ap-freight-info').textContent = 'Parsing ' + file.name + '…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null });
+      apFreightData = apParseFreightRows(rows);
+      document.getElementById('ap-freight-info').textContent = '✓ ' + file.name + ' — ' + apFreightData.length + ' transactions';
+      apFreightDz.classList.add('loaded');
+      apRenderAll();
+    } catch(err) { document.getElementById('ap-freight-info').textContent = 'Error: ' + err.message; console.error(err); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── PARSE ─────────────────────────────────────────────
+function apToDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (typeof d === 'string') return new Date(d);
+  if (typeof d === 'number') { const e = new Date(1899,11,30); e.setDate(e.getDate()+Math.floor(d)); return e; }
+  return null;
+}
+
+function apParseAgingRows(rows) {
+  const vendors = {};
+  let vendor = null;
+  for (const raw of rows) {
+    const r = Array.from({length:13}, (_,i) => raw[i] ?? null);
+    if (r[0] && typeof r[0]==='string' && r[0].trim() && !'Total'.includes(r[0].trim().slice(-5))) {
+      const v = r[0].trim();
+      if (!v.includes('Total') && !v.includes('Black Ranches') && !v.includes('Page') &&
+          !v.includes('PM') && !v.includes('Vendor Aging') && !v.includes('Aging Date') && !v.match(/^\d/)) {
+        vendor = v.split('  ')[0].trim();
+      }
+    }
+    const invDate = apToDate(r[1]);
+    if (!invDate || !vendor) continue;
+    if (!vendors[vendor]) vendors[vendor] = {vendor, amtDue:0, current:0, d30:0, d60:0, d90:0, over90:0, invoices:[]};
+    const amt = r[5] || 0;
+    vendors[vendor].amtDue  += amt;
+    vendors[vendor].current += r[6] || 0;
+    vendors[vendor].d30     += r[7] || 0;
+    vendors[vendor].d60     += r[8] || 0;
+    vendors[vendor].d90     += r[9] || 0;
+    vendors[vendor].over90  += r[10] || 0;
+    vendors[vendor].invoices.push({
+      invDate: apToDate(r[1]), dueDate: apToDate(r[3]),
+      terms: r[4] || '', amt
+    });
+  }
+  return Object.values(vendors).filter(v => Math.abs(v.amtDue) > 0.01);
+}
+
+function apParseFreightRows(rows) {
+  const txns = [];
+  let vendor = null;
+  for (const raw of rows) {
+    const r = Array.from({length:15}, (_,i) => raw[i] ?? null);
+    if (r[0] && typeof r[0]==='string' && r[0].trim() && !r[3]) {
+      const v = r[0].trim();
+      if (!v.includes('Total') && !v.includes('Black Ranches') && !v.includes('Page') &&
+          !v.includes('PM') && !v.includes('Purchases by') && !v.match(/^\d/)) {
+        vendor = v.split('  ')[0].trim();
+      }
+    }
+    const date = apToDate(r[3]);
+    if (!date || !vendor) continue;
+    const amount = r[8] || 0;
+    if (amount <= 0) continue;
+    const dateStr = date.toISOString().split('T')[0];
+    txns.push({
+      date, dateStr, month: dateStr.slice(0,7),
+      vendor,
+      profitCenter: r[10] ? String(r[10]).trim() : '',
+      location: r[11] ? String(r[11]).trim() : '',
+      notation: r[12] ? String(r[12]).trim() : '',
+      amount
+    });
+  }
+  return txns.sort((a,b) => a.date - b.date);
+}
+
+// ── RENDER ALL ────────────────────────────────────────
+let frSelectedYear = 'all';
+
+function apRenderAll() {
+  // AP Aging section
+  const hasAging = apAgingData.length > 0;
+  document.getElementById('ap-dashboard').style.display = hasAging ? 'block' : 'none';
+  document.getElementById('ap-empty').style.display = hasAging ? 'none' : 'block';
+  if (hasAging) { apRenderAgingStats(); apRenderAgingChart(); apRenderAgingTable(); }
+
+  // Freight section
+  const hasFreight = apFreightData.length > 0;
+  document.getElementById('freight-dashboard').style.display = hasFreight ? 'block' : 'none';
+  document.getElementById('freight-empty').style.display = hasFreight ? 'none' : 'block';
+  if (hasFreight) { frBuildYearButtons(); frRenderFreight(); }
+}
+
+function frGetYears() {
+  return [...new Set(apFreightData.map(t => t.date.getFullYear()))].sort();
+}
+
+function frFilteredData() {
+  if (frSelectedYear === 'all') return apFreightData;
+  return apFreightData.filter(t => t.date.getFullYear() === frSelectedYear);
+}
+
+function frBuildYearButtons() {
+  const years = frGetYears();
+  const container = document.getElementById('fr-year-btns');
+  container.innerHTML = '';
+
+  // All button
+  const allBtn = document.createElement('button');
+  allBtn.className = 'toggle-btn' + (frSelectedYear === 'all' ? ' active' : '');
+  allBtn.textContent = 'All';
+  allBtn.onclick = () => { frSelectedYear = 'all'; frBuildYearButtons(); frRenderFreight(); };
+  container.appendChild(allBtn);
+
+  years.forEach(yr => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-btn' + (frSelectedYear === yr ? ' active' : '');
+    btn.textContent = yr;
+    btn.onclick = () => { frSelectedYear = yr; frBuildYearButtons(); frRenderFreight(); };
+    container.appendChild(btn);
+  });
+}
+
+function frRenderFreight() {
+  apRenderFreightStats();
+  apRenderFreightChart();
+  apRenderFreightClassChart();
+  apRenderFreightVendorTable();
+}
+
+function apFmtK(n) { return n>=1000000?'$'+(n/1000000).toFixed(1)+'M':'$'+Math.round(n/1000)+'K'; }
+function apFmt$(n) { return '$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// ── AGING STATS ───────────────────────────────────────
+function apRenderAgingStats() {
+  const total   = apAgingData.reduce((s,v)=>s+v.amtDue,0);
+  const current = apAgingData.reduce((s,v)=>s+v.current,0);
+  const past    = total - current;
+  const over90  = apAgingData.reduce((s,v)=>s+v.over90,0);
+  document.getElementById('ap-aging-stats').innerHTML = [
+    apPill('Total AP Outstanding', apFmtK(total), 'amber'),
+    apPill('Current', apFmtK(current), 'green'),
+    apPill('1–30 Days', apFmtK(apAgingData.reduce((s,v)=>s+v.d30,0)), ''),
+    apPill('31–60 Days', apFmtK(apAgingData.reduce((s,v)=>s+v.d60,0)), past>0?'red':''),
+    apPill('61–90 Days', apFmtK(apAgingData.reduce((s,v)=>s+v.d90,0)), ''),
+    apPill('Over 90 Days', apFmtK(over90), over90>0?'red':''),
+  ].join('');
+}
+function apPill(l,v,c){ return `<div class="stat-pill"><div class="slabel">${l}</div><div class="sval ${c}">${v}</div></div>`; }
+
+// ── AGING CHART ───────────────────────────────────────
+function apRenderAgingChart() {
+  const sorted = [...apAgingData].sort((a,b)=>b.amtDue-a.amtDue).slice(0,15);
+  const labels = sorted.map(v => v.vendor.length>22 ? v.vendor.slice(0,20)+'…' : v.vendor);
+  if (apAgingChart) apAgingChart.destroy();
+  const ctx = document.getElementById('ap-aging-chart').getContext('2d');
+  apAgingChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'Current',    data:sorted.map(v=>v.current), backgroundColor:'#10b98199', borderColor:'#10b981', borderWidth:1, borderRadius:2 },
+      { label:'1-30 Days',  data:sorted.map(v=>v.d30),     backgroundColor:'#f59e0b99', borderColor:'#f59e0b', borderWidth:1, borderRadius:2 },
+      { label:'31-60 Days', data:sorted.map(v=>v.d60),     backgroundColor:'#f9730099', borderColor:'#f97300', borderWidth:1, borderRadius:2 },
+      { label:'61-90 Days', data:sorted.map(v=>v.d90),     backgroundColor:'#ef444499', borderColor:'#ef4444', borderWidth:1, borderRadius:2 },
+      { label:'Over 90',    data:sorted.map(v=>v.over90),  backgroundColor:'#99000099', borderColor:'#990000', borderWidth:1, borderRadius:2 },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',boxWidth:12,font:{size:10}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>c.parsed.y>0?' '+c.dataset.label+': $'+c.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}):''}}
+      },
+      scales:{
+        x:{stacked:true,grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},maxRotation:35}},
+        y:{stacked:true,grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},callback:v=>v>=1000?'$'+Math.round(v/1000)+'K':'$'+v}}
+      }
+    }
+  });
+}
+
+// ── AGING TABLE ───────────────────────────────────────
+function apAgingTableSort(col) {
+  if (apAgingSortCol===col) apAgingSortAsc=!apAgingSortAsc;
+  else { apAgingSortCol=col; apAgingSortAsc=false; }
+  apRenderAgingTable();
+}
+
+function apRenderAgingTable() {
+  const rows = [...apAgingData].sort((a,b)=>{
+    const av=a[apAgingSortCol]??'', bv=b[apAgingSortCol]??'';
+    const cmp = typeof av==='number'?av-bv:String(av).localeCompare(String(bv));
+    return apAgingSortAsc?cmp:-cmp;
+  });
+  const si = col => col===apAgingSortCol?(apAgingSortAsc?'▲':'▼'):'↕';
+  const th = (col,lbl,extra='') => `<th style="cursor:pointer;user-select:none;text-align:right;${extra}" onclick="apAgingTableSort('${col}')">${lbl} ${si(col)}</th>`;
+
+  const total = {amtDue:0,current:0,d30:0,d60:0,d90:0,over90:0};
+  rows.forEach(r=>{ total.amtDue+=r.amtDue; total.current+=r.current; total.d30+=r.d30; total.d60+=r.d60; total.d90+=r.d90; total.over90+=r.over90; });
+
+  document.getElementById('ap-aging-table').innerHTML = `<table>
+    <thead><tr>
+      <th style="cursor:pointer;user-select:none" onclick="apAgingTableSort('vendor')">Vendor ${si('vendor')}</th>
+      ${th('amtDue','Total Due','color:var(--accent3)')}
+      ${th('current','Current','color:var(--accent2)')}
+      ${th('d30','1–30 Days','')}
+      ${th('d60','31–60 Days','')}
+      ${th('d90','61–90 Days','')}
+      ${th('over90','Over 90','color:var(--danger)')}
+    </tr></thead>
+    <tbody>
+    ${rows.map(r=>`<tr>
+      <td>${r.vendor}</td>
+      <td class="num" style="text-align:right;font-weight:600;color:var(--accent3)">${apFmt$(r.amtDue)}</td>
+      <td class="num" style="text-align:right;color:var(--accent2)">${r.current>0?apFmt$(r.current):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.d30>0?'var(--accent3)':'var(--muted)'}">${r.d30>0?apFmt$(r.d30):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.d60>0?'var(--danger)':'var(--muted)'}">${r.d60>0?apFmt$(r.d60):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.d90>0?'var(--danger)':'var(--muted)'}">${r.d90>0?apFmt$(r.d90):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.over90>0?'var(--danger)':'var(--muted)'};font-weight:${r.over90>0?600:400}">${r.over90>0?apFmt$(r.over90):'—'}</td>
+    </tr>`).join('')}
+    <tr style="border-top:2px solid var(--border);font-weight:700;background:rgba(42,45,62,.4)">
+      <td>Total</td>
+      <td class="num" style="text-align:right;color:var(--accent3)">${apFmt$(total.amtDue)}</td>
+      <td class="num" style="text-align:right;color:var(--accent2)">${apFmt$(total.current)}</td>
+      <td class="num" style="text-align:right">${apFmt$(total.d30)}</td>
+      <td class="num" style="text-align:right">${total.d60>0?apFmt$(total.d60):'—'}</td>
+      <td class="num" style="text-align:right">${total.d90>0?apFmt$(total.d90):'—'}</td>
+      <td class="num" style="text-align:right;color:${total.over90>0?'var(--danger)':''}">${total.over90>0?apFmt$(total.over90):'—'}</td>
+    </tr>
+    </tbody>
+  </table>`;
+}
+
+// ── FREIGHT STATS ─────────────────────────────────────
+function apRenderFreightStats() {
+  const total = frFilteredData().reduce((s,t)=>s+t.amount,0);
+  const vendors = new Set(frFilteredData().map(t=>t.vendor)).size;
+  const classes = new Set(frFilteredData().filter(t=>t.profitCenter).map(t=>t.profitCenter)).size;
+  const months  = new Set(frFilteredData().map(t=>t.month)).size;
+  const avgMo   = months > 0 ? total/months : 0;
+  document.getElementById('ap-freight-stats').innerHTML = [
+    apPill('Total Freight', apFmtK(total), 'blue'),
+    apPill('Freight Vendors', vendors, ''),
+    apPill('Classes Served', classes, ''),
+    apPill('Avg / Month', apFmtK(avgMo), ''),
+  ].join('');
+}
+
+// ── FREIGHT MONTHLY CHART ─────────────────────────────
+function apRenderFreightChart() {
+  const fd = frFilteredData();
+  const months = [...new Set(fd.map(t=>t.month))].sort();
+  const data   = months.map(m => fd.filter(t=>t.month===m).reduce((s,t)=>s+t.amount,0));
+  const labels = months.map(m=>{ const [y,mo]=m.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1]+" '"+y.slice(2); });
+  if (apFreightChart) apFreightChart.destroy();
+  const ctx = document.getElementById('ap-freight-chart').getContext('2d');
+  apFreightChart = new Chart(ctx, {
+    type:'bar', data:{ labels, datasets:[{
+      label:'Freight $', data,
+      backgroundColor:'#a78bfa99', borderColor:'#a78bfa', borderWidth:1, borderRadius:3
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>' $'+Math.round(c.parsed.y).toLocaleString()}}
+      },
+      scales:{
+        x:{grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},maxRotation:35}},
+        y:{grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},callback:v=>v>=1000?'$'+Math.round(v/1000)+'K':'$'+v}}
+      }
+    }
+  });
+}
+
+// ── FREIGHT BY CLASS CHART ────────────────────────────
+function apRenderFreightClassChart() {
+  const byClass = {};
+  frFilteredData().forEach(t => {
+    if (!t.profitCenter) return;
+    byClass[t.profitCenter] = (byClass[t.profitCenter]||0) + t.amount;
+  });
+  const sorted = Object.entries(byClass).sort((a,b)=>b[1]-a[1]);
+  const labels = sorted.map(([k])=>k.length>24?k.slice(0,22)+'…':k);
+  const data   = sorted.map(([,v])=>v);
+  const colors = sorted.map(([k])=>classColor(k));
+  if (apFreightClassChart) apFreightClassChart.destroy();
+  const ctx = document.getElementById('ap-freight-class-chart').getContext('2d');
+  apFreightClassChart = new Chart(ctx, {
+    type:'bar', data:{ labels, datasets:[{
+      label:'Freight $', data,
+      backgroundColor:colors.map(c=>c+'99'), borderColor:colors, borderWidth:1, borderRadius:3
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>' $'+Math.round(c.parsed.y).toLocaleString()}}
+      },
+      scales:{
+        x:{grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},maxRotation:35}},
+        y:{grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},callback:v=>v>=1000?'$'+Math.round(v/1000)+'K':'$'+v}}
+      }
+    }
+  });
+}
+
+// ── FREIGHT VENDOR TABLE ──────────────────────────────
+function apFreightTableSort(col) {
+  if (apFreightSortCol===col) apFreightSortAsc=!apFreightSortAsc;
+  else { apFreightSortCol=col; apFreightSortAsc=false; }
+  apRenderFreightVendorTable();
+}
+
+function apRenderFreightVendorTable() {
+  const byVendor = {};
+  frFilteredData().forEach(t => {
+    if (!byVendor[t.vendor]) byVendor[t.vendor] = {vendor:t.vendor, amt:0, txns:0};
+    byVendor[t.vendor].amt  += t.amount;
+    byVendor[t.vendor].txns += 1;
+  });
+  const total = frFilteredData().reduce((s,t)=>s+t.amount,0);
+  const rows  = Object.values(byVendor).sort((a,b)=>{
+    const av=a[apFreightSortCol]??0, bv=b[apFreightSortCol]??0;
+    const cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv));
+    return apFreightSortAsc?cmp:-cmp;
+  });
+  const si = col => col===apFreightSortCol?(apFreightSortAsc?'▲':'▼'):'↕';
+  const th = (col,lbl,extra='') => `<th style="cursor:pointer;user-select:none;text-align:right;${extra}" onclick="apFreightTableSort('${col}')">${lbl} ${si(col)}</th>`;
+  document.getElementById('ap-freight-vendor-table').innerHTML = `<table>
+    <thead><tr>
+      <th style="cursor:pointer;user-select:none" onclick="apFreightTableSort('vendor')">Vendor ${si('vendor')}</th>
+      ${th('amt','Total Freight','')}
+      ${th('txns','Loads','')}
+      <th style="text-align:right">Avg/Load</th>
+      <th>Share</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r=>{
+      const pct = total>0?r.amt/total:0;
+      const barW = Math.round(pct*100);
+      return `<tr>
+        <td>${r.vendor}</td>
+        <td class="num" style="text-align:right">$${Math.round(r.amt).toLocaleString()}</td>
+        <td class="num" style="text-align:right">${r.txns}</td>
+        <td class="num" style="text-align:right">$${Math.round(r.amt/r.txns).toLocaleString()}</td>
+        <td><div class="bar-cell"><div class="mini-bar" style="width:${barW}px;background:#a78bfa"></div>
+          <span class="num" style="color:var(--muted);font-size:.76rem">${(pct*100).toFixed(1)}%</span></div></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ── SAVE / LOAD SHARED ────────────────────────────────
+function apSaveShared() {
+  if (!apAgingData.length && !apFreightData.length) { alert('No data loaded.'); return; }
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Vendor Aging',
+    aging: apAgingData,
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ap_freight.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setTimeout(()=>alert('ap_aging.json downloaded.\n\nUpload to docs/ in GitHub to enable auto-load.'),300);
+}
+
+function frSaveShared() {
+  if (!apFreightData.length) { alert('No freight data loaded.'); return; }
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Purchases by Vendor & Account',
+    freight: apFreightData.map(t=>({...t, date:t.dateStr})),
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'freight.json'; a.click(); URL.revokeObjectURL(a.href);
+  setTimeout(()=>alert('freight.json downloaded.\n\nUpload to docs/ in GitHub.'),300);
+}
+
+async function apTryLoadShared() {
+  // Load AP aging
+  try {
+    const r = await fetch('./ap_freight.json?'+Date.now());
+    if (r.ok) {
+      const data = await r.json();
+      if (data.aging) {
+        apAgingData = data.aging;
+        document.getElementById('ap-aging-info').textContent = '✓ Shared data loaded ('+data.generated+')';
+        document.getElementById('ap-aging-drop').classList.add('loaded');
+        apRenderAll();
+      }
+    }
+  } catch {}
+  // Load freight separately
+  try {
+    const r2 = await fetch('./freight.json?'+Date.now());
+    if (r2.ok) {
+      const data2 = await r2.json();
+      if (data2.freight) {
+        apFreightData = data2.freight.map(t=>({...t, date:new Date(t.date), month:t.date.slice(0,7)}));
+        document.getElementById('ap-freight-info').textContent = '✓ Shared data loaded ('+data2.generated+')';
+        document.getElementById('ap-freight-drop').classList.add('loaded');
+        apRenderAll();
+      }
+    }
+  } catch {}
+}
+
+
+// ── CUSTOMER AGING ────────────────────────────────────
+let arAgingData = [];
+let arAgingChart = null;
+let arAgingSortCol = 'amtDue', arAgingSortAsc = false;
+
+const arAgingDz = document.getElementById('ar-aging-drop');
+const arAgingFi = document.getElementById('ar-aging-fi');
+arAgingDz.addEventListener('dragover', e => { e.preventDefault(); arAgingDz.classList.add('drag-over'); });
+arAgingDz.addEventListener('dragleave', () => arAgingDz.classList.remove('drag-over'));
+arAgingDz.addEventListener('drop', e => { e.preventDefault(); arAgingDz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) arParseAging(f); });
+arAgingFi.addEventListener('change', e => { e.stopPropagation(); if(e.target.files[0]) arParseAging(e.target.files[0]); });
+
+function arParseAging(file) {
+  document.getElementById('ar-aging-info').textContent = 'Parsing ' + file.name + '…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null });
+      arAgingData = arParseAgingRows(rows);
+      document.getElementById('ar-aging-info').textContent = '✓ ' + file.name + ' — ' + arAgingData.length + ' customers';
+      arAgingDz.style.borderColor = '#6366f1';
+      arAgingDz.classList.add('loaded');
+      arRenderAging();
+    } catch(err) { document.getElementById('ar-aging-info').textContent = 'Error: ' + err.message; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function arParseAgingRows(rows) {
+  // Customer aging: col1=txn#, col3=date, col6=balDue, col7=current, col8=1-30, col9=31-60, col10=61-90, col11=over90
+  const customers = {};
+  let customer = null;
+  for (const raw of rows) {
+    const r = Array.from({length:14}, (_,i) => raw[i] ?? null);
+    if (r[0] && typeof r[0]==='string' && r[0].trim() && !r[3]) {
+      const v = r[0].trim();
+      if (!v.includes('Total') && !v.includes('Black Ranches') && !v.includes('Page') &&
+          !v.includes('PM') && !v.includes('Customer Aging') && !v.includes('Aging Date') && !v.match(/^\d/)) {
+        customer = v.split('  ')[0].trim();
+      }
+    }
+    if (!(r[3] instanceof Date) && typeof r[3] !== 'number' && !(r[3] && typeof r[3]==='object')) continue;
+    const d = apToDate(r[3]);
+    if (!d || !customer) continue;
+    if (!customers[customer]) customers[customer] = {customer, amtDue:0, current:0, d30:0, d60:0, d90:0, over90:0};
+    customers[customer].amtDue  += r[6]  || 0;
+    customers[customer].current += r[7]  || 0;
+    customers[customer].d30     += r[8]  || 0;
+    customers[customer].d60     += r[9]  || 0;
+    customers[customer].d90     += r[10] || 0;
+    customers[customer].over90  += r[11] || 0;
+  }
+  return Object.values(customers).filter(v => Math.abs(v.amtDue) > 0.01);
+}
+
+function arRenderAging() {
+  if (!arAgingData.length) return;
+  document.getElementById('ar-dashboard').style.display = 'block';
+  document.getElementById('ar-empty').style.display = 'none';
+  arRenderAgingStats();
+  arRenderAgingChart();
+  arRenderAgingTable();
+}
+
+function arRenderAgingStats() {
+  const total   = arAgingData.reduce((s,v)=>s+v.amtDue,0);
+  const current = arAgingData.reduce((s,v)=>s+v.current,0);
+  const over90  = arAgingData.reduce((s,v)=>s+v.over90,0);
+  document.getElementById('ar-aging-stats').innerHTML = [
+    apPill('Total AR Outstanding', apFmtK(total), 'blue'),
+    apPill('Current', apFmtK(current), 'green'),
+    apPill('1–30 Days', apFmtK(arAgingData.reduce((s,v)=>s+v.d30,0)), ''),
+    apPill('31–60 Days', apFmtK(arAgingData.reduce((s,v)=>s+v.d60,0)), ''),
+    apPill('61–90 Days', apFmtK(arAgingData.reduce((s,v)=>s+v.d90,0)), ''),
+    apPill('Over 90 Days', apFmtK(over90), over90>500?'amber':''),
+  ].join('');
+}
+
+function arRenderAgingChart() {
+  const sorted = [...arAgingData].filter(v=>v.amtDue>0).sort((a,b)=>b.amtDue-a.amtDue);
+  if (!sorted.length) return;
+  const labels = sorted.map(v => v.customer.length>22 ? v.customer.slice(0,20)+'…' : v.customer);
+  if (arAgingChart) arAgingChart.destroy();
+  const ctx = document.getElementById('ar-aging-chart').getContext('2d');
+  arAgingChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'Current',    data:sorted.map(v=>v.current), backgroundColor:'#6366f199', borderColor:'#6366f1', borderWidth:1, borderRadius:2 },
+      { label:'1-30 Days',  data:sorted.map(v=>v.d30),     backgroundColor:'#f59e0b99', borderColor:'#f59e0b', borderWidth:1, borderRadius:2 },
+      { label:'31-60 Days', data:sorted.map(v=>v.d60),     backgroundColor:'#f9730099', borderColor:'#f97300', borderWidth:1, borderRadius:2 },
+      { label:'61-90 Days', data:sorted.map(v=>v.d90),     backgroundColor:'#ef444499', borderColor:'#ef4444', borderWidth:1, borderRadius:2 },
+      { label:'Over 90',    data:sorted.map(v=>v.over90),  backgroundColor:'#99000099', borderColor:'#990000', borderWidth:1, borderRadius:2 },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',boxWidth:12,font:{size:10}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2a2d3e',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>c.parsed.y>0?' '+c.dataset.label+': $'+c.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}):''}}
+      },
+      scales:{
+        x:{stacked:true,grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},maxRotation:35}},
+        y:{stacked:true,grid:{color:'#2a2d3e'},ticks:{color:'#64748b',font:{size:10},callback:v=>v>=1000?'$'+Math.round(v/1000)+'K':'$'+v}}
+      }
+    }
+  });
+}
+
+function arAgingTableSort(col) {
+  if (arAgingSortCol===col) arAgingSortAsc=!arAgingSortAsc;
+  else { arAgingSortCol=col; arAgingSortAsc=false; }
+  arRenderAgingTable();
+}
+
+function arRenderAgingTable() {
+  const rows = [...arAgingData].sort((a,b)=>{
+    const av=a[arAgingSortCol]??'', bv=b[arAgingSortCol]??'';
+    const cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv));
+    return arAgingSortAsc?cmp:-cmp;
+  });
+  const si = col => col===arAgingSortCol?(arAgingSortAsc?'▲':'▼'):'↕';
+  const th = (col,lbl,extra='') => `<th style="cursor:pointer;user-select:none;text-align:right;${extra}" onclick="arAgingTableSort('${col}')">${lbl} ${si(col)}</th>`;
+  const total = {amtDue:0,current:0,d30:0,d60:0,d90:0,over90:0};
+  rows.forEach(r=>{ total.amtDue+=r.amtDue; total.current+=r.current; total.d30+=r.d30; total.d60+=r.d60; total.d90+=r.d90; total.over90+=r.over90; });
+
+  document.getElementById('ar-aging-table').innerHTML = `<table>
+    <thead><tr>
+      <th style="cursor:pointer;user-select:none" onclick="arAgingTableSort('customer')">Customer ${si('customer')}</th>
+      ${th('amtDue','Total Due','color:var(--accent)')}
+      ${th('current','Current','color:#6366f1')}
+      ${th('d30','1–30 Days','')}
+      ${th('d60','31–60 Days','')}
+      ${th('d90','61–90 Days','')}
+      ${th('over90','Over 90','color:var(--danger)')}
+    </tr></thead>
+    <tbody>
+    ${rows.map(r=>`<tr>
+      <td>${r.customer}</td>
+      <td class="num" style="text-align:right;font-weight:600;color:var(--accent)">${apFmt$(r.amtDue)}</td>
+      <td class="num" style="text-align:right;color:#6366f1">${r.current>0?apFmt$(r.current):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.d30>0?'var(--accent3)':'var(--muted)'}">${r.d30>0?apFmt$(r.d30):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.d60>0?'var(--danger)':'var(--muted)'}">${r.d60>0?apFmt$(r.d60):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.d90>0?'var(--danger)':'var(--muted)'}">${r.d90>0?apFmt$(r.d90):'—'}</td>
+      <td class="num" style="text-align:right;color:${r.over90>0?'var(--danger)':'var(--muted)'};font-weight:${r.over90>0?600:400}">${r.over90>0?apFmt$(r.over90):'—'}</td>
+    </tr>`).join('')}
+    <tr style="border-top:2px solid var(--border);font-weight:700;background:rgba(42,45,62,.4)">
+      <td>Total</td>
+      <td class="num" style="text-align:right;color:var(--accent)">${apFmt$(total.amtDue)}</td>
+      <td class="num" style="text-align:right;color:#6366f1">${apFmt$(total.current)}</td>
+      <td class="num" style="text-align:right">${total.d30>0?apFmt$(total.d30):'—'}</td>
+      <td class="num" style="text-align:right">${total.d60>0?apFmt$(total.d60):'—'}</td>
+      <td class="num" style="text-align:right">${total.d90>0?apFmt$(total.d90):'—'}</td>
+      <td class="num" style="text-align:right;color:${total.over90>0?'var(--danger)':''}">${total.over90>0?apFmt$(total.over90):'—'}</td>
+    </tr>
+    </tbody>
+  </table>`;
+}
+
+function arSaveShared() {
+  if (!arAgingData.length) { alert('No customer aging data loaded.'); return; }
+  const payload = {
+    generated: new Date().toISOString().split('T')[0],
+    source: 'Centerpoint Customer Aging',
+    customerAging: arAgingData,
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'ar_aging.json'; a.click(); URL.revokeObjectURL(a.href);
+  setTimeout(()=>alert('ar_aging.json downloaded.\n\nUpload to docs/ in GitHub.'),300);
+}
+
+async function arTryLoadShared() {
+  try {
+    const r = await fetch('./ar_aging.json?'+Date.now());
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data.customerAging && data.customerAging.length) {
+      arAgingData = data.customerAging;
+      document.getElementById('ar-aging-info').textContent = '✓ Shared data loaded (' + data.generated + ')';
+      document.getElementById('ar-aging-drop').classList.add('loaded');
+      arRenderAging();
+    }
+  } catch {}
+}
 
 </script>
 </body>
