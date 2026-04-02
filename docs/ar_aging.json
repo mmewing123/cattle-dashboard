@@ -1,0 +1,96 @@
+{
+  "generated": "2026-04-02",
+  "source": "Centerpoint Customer Aging",
+  "customerAging": [
+    {
+      "customer": "Billings Livestock Commission",
+      "amtDue": 1472.75,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 1472.75
+    },
+    {
+      "customer": "CME Dispatch LLC",
+      "amtDue": 1875,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 1875
+    },
+    {
+      "customer": "Idaho State Tax Commission",
+      "amtDue": -162.55,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": -162.55
+    },
+    {
+      "customer": "KCoe Isom, LLP/Pinion",
+      "amtDue": -350,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": -350
+    },
+    {
+      "customer": "Monte Vista Livestock Auction",
+      "amtDue": 2,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 2
+    },
+    {
+      "customer": "Oregon Department of Revenue",
+      "amtDue": 162.55,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 162.55
+    },
+    {
+      "customer": "Progenco, Inc",
+      "amtDue": 69136.81000000008,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 69136.81000000008
+    },
+    {
+      "customer": "Riverview, LLP",
+      "amtDue": 413550,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 413550
+    },
+    {
+      "customer": "SFRG Founder",
+      "amtDue": 350.40999999999997,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 350.40999999999997
+    },
+    {
+      "customer": "Wulf Cattle",
+      "amtDue": 349.13,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 349.13
+    }
+  ]
+}

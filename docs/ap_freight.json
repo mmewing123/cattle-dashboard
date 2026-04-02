@@ -1,0 +1,1027 @@
+{
+  "generated": "2026-04-02",
+  "source": "Centerpoint Vendor Aging",
+  "aging": [
+    {
+      "vendor": "Ackerman Ag Service & Supply",
+      "amtDue": 201.64,
+      "current": 0,
+      "d30": 201.64,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-11T07:00:00.000Z",
+          "dueDate": "2026-03-11T07:00:00.000Z",
+          "terms": "",
+          "amt": 89.56
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-03-30T07:00:00.000Z",
+          "terms": "",
+          "amt": 112.08
+        }
+      ]
+    },
+    {
+      "vendor": "Action Communications, Inc",
+      "amtDue": -0.09,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": -0.09,
+      "invoices": [
+        {
+          "invDate": "2025-09-19T07:00:00.000Z",
+          "dueDate": "2025-09-19T07:00:00.000Z",
+          "terms": "",
+          "amt": -0.09
+        }
+      ]
+    },
+    {
+      "vendor": "Agar Transportation",
+      "amtDue": 0.06,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0.06,
+      "invoices": [
+        {
+          "invDate": "2025-11-20T08:00:00.000Z",
+          "dueDate": "2025-11-20T08:00:00.000Z",
+          "terms": "",
+          "amt": 0.06
+        }
+      ]
+    },
+    {
+      "vendor": "AgriWebb",
+      "amtDue": 7000,
+      "current": 7000,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-28T07:00:00.000Z",
+          "dueDate": "2026-04-27T07:00:00.000Z",
+          "terms": "Net 30",
+          "amt": 7000
+        }
+      ]
+    },
+    {
+      "vendor": "Animal Health International",
+      "amtDue": 25691.96999999999,
+      "current": 25691.96999999999,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-02T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 24.29
+        },
+        {
+          "invDate": "2026-03-02T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 83.55
+        },
+        {
+          "invDate": "2026-03-03T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 891.65
+        },
+        {
+          "invDate": "2026-03-03T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 1108.88
+        },
+        {
+          "invDate": "2026-03-03T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 149.45
+        },
+        {
+          "invDate": "2026-03-03T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 544.25
+        },
+        {
+          "invDate": "2026-03-03T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 194.06
+        },
+        {
+          "invDate": "2026-03-03T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 1583.8
+        },
+        {
+          "invDate": "2026-03-04T08:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 267.8
+        },
+        {
+          "invDate": "2026-03-10T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 1773.33
+        },
+        {
+          "invDate": "2026-03-10T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 78.63
+        },
+        {
+          "invDate": "2026-03-10T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 626.61
+        },
+        {
+          "invDate": "2026-03-10T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 142.53
+        },
+        {
+          "invDate": "2026-03-10T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 763.41
+        },
+        {
+          "invDate": "2026-03-13T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 83.55
+        },
+        {
+          "invDate": "2026-03-13T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 87.47
+        },
+        {
+          "invDate": "2026-03-16T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 4866.8
+        },
+        {
+          "invDate": "2026-03-16T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 91.19
+        },
+        {
+          "invDate": "2026-03-16T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 71.64
+        },
+        {
+          "invDate": "2026-03-17T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 1796.52
+        },
+        {
+          "invDate": "2026-03-17T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 3959.02
+        },
+        {
+          "invDate": "2026-03-17T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 125.32
+        },
+        {
+          "invDate": "2026-03-18T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 1798.03
+        },
+        {
+          "invDate": "2026-03-18T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 1548.44
+        },
+        {
+          "invDate": "2026-03-20T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 41.76
+        },
+        {
+          "invDate": "2026-03-20T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 137.38
+        },
+        {
+          "invDate": "2026-03-20T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 2039.71
+        },
+        {
+          "invDate": "2026-03-20T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 41.76
+        },
+        {
+          "invDate": "2026-03-25T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 100.6
+        },
+        {
+          "invDate": "2026-03-25T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 143.04
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 85.34
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 13.01
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 19.66
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 238.81
+        },
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "15th",
+          "amt": 170.68
+        }
+      ]
+    },
+    {
+      "vendor": "Bella Farms Inc",
+      "amtDue": 28187,
+      "current": 0,
+      "d30": 28187,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 28187
+        }
+      ]
+    },
+    {
+      "vendor": "Bernie's Ace Hardware",
+      "amtDue": 68.46,
+      "current": 0,
+      "d30": 68.46,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-03-30T07:00:00.000Z",
+          "terms": "",
+          "amt": 68.46
+        }
+      ]
+    },
+    {
+      "vendor": "Bloedorn Lumber",
+      "amtDue": 134.28,
+      "current": 134.28,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-10T07:00:00.000Z",
+          "terms": "Net 10",
+          "amt": 63.15
+        },
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-04-10T07:00:00.000Z",
+          "terms": "Net 10",
+          "amt": 71.13
+        }
+      ]
+    },
+    {
+      "vendor": "Borda, John",
+      "amtDue": 700,
+      "current": 0,
+      "d30": 700,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 700
+        }
+      ]
+    },
+    {
+      "vendor": "Carma James Forthe",
+      "amtDue": 0.15,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0.15,
+      "invoices": [
+        {
+          "invDate": "2024-10-28T07:00:00.000Z",
+          "dueDate": "2024-10-28T07:00:00.000Z",
+          "terms": "",
+          "amt": 0.15
+        }
+      ]
+    },
+    {
+      "vendor": "CCDOA Las Airport",
+      "amtDue": 2898.29,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 2898.29,
+      "invoices": [
+        {
+          "invDate": "2025-10-28T07:00:00.000Z",
+          "dueDate": "2025-11-15T08:00:00.000Z",
+          "terms": "15th",
+          "amt": 2898.29
+        }
+      ]
+    },
+    {
+      "vendor": "Colorado Agri Products",
+      "amtDue": 1713.61,
+      "current": 1713.61,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-04-09T07:00:00.000Z",
+          "terms": "",
+          "amt": 1713.61
+        }
+      ]
+    },
+    {
+      "vendor": "Conner, Kaci",
+      "amtDue": 1225,
+      "current": 1225,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-28T07:00:00.000Z",
+          "dueDate": "2026-04-08T07:00:00.000Z",
+          "terms": "",
+          "amt": 1225
+        }
+      ]
+    },
+    {
+      "vendor": "DeBoer & Sons Trucking, Inc.",
+      "amtDue": 882,
+      "current": 882,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-16T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "Net 30",
+          "amt": 882
+        }
+      ]
+    },
+    {
+      "vendor": "Dinklage Feed Yard Sidney",
+      "amtDue": 8725.83,
+      "current": 0,
+      "d30": 8725.83,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 8725.83
+        }
+      ]
+    },
+    {
+      "vendor": "Dreiling, Tom",
+      "amtDue": 700,
+      "current": 0,
+      "d30": 700,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-25T07:00:00.000Z",
+          "dueDate": "2026-03-25T07:00:00.000Z",
+          "terms": "",
+          "amt": 700
+        }
+      ]
+    },
+    {
+      "vendor": "Dwight Wigley",
+      "amtDue": 525,
+      "current": 0,
+      "d30": 525,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 525
+        }
+      ]
+    },
+    {
+      "vendor": "First National Bank of Omaha - Agribusine",
+      "amtDue": 947.6800000000001,
+      "current": 0,
+      "d30": 947.6800000000001,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 74.99
+        },
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 16.98
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 25.3
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 22.84
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 450
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 167.31
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 29.35
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 106.89
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 54.02
+        }
+      ]
+    },
+    {
+      "vendor": "Garden County Treasurer",
+      "amtDue": 122810.88,
+      "current": 122810.88,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-01-22T08:00:00.000Z",
+          "dueDate": "2026-08-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 61405.44
+        },
+        {
+          "invDate": "2026-01-22T08:00:00.000Z",
+          "dueDate": "2026-04-30T07:00:00.000Z",
+          "terms": "",
+          "amt": 61405.44
+        }
+      ]
+    },
+    {
+      "vendor": "GW Grinding",
+      "amtDue": 76695.45,
+      "current": 0,
+      "d30": 76695.45,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 76695.45
+        }
+      ]
+    },
+    {
+      "vendor": "H & H Sanitation",
+      "amtDue": -2076.06,
+      "current": 0,
+      "d30": 525,
+      "d60": 0,
+      "d90": 0,
+      "over90": -2601.06,
+      "invoices": [
+        {
+          "invDate": "2024-10-28T07:00:00.000Z",
+          "dueDate": "2024-10-28T07:00:00.000Z",
+          "terms": "",
+          "amt": -2601.06
+        },
+        {
+          "invDate": "2026-03-25T07:00:00.000Z",
+          "dueDate": "2026-03-25T07:00:00.000Z",
+          "terms": "",
+          "amt": 525
+        }
+      ]
+    },
+    {
+      "vendor": "InterState Oil Company",
+      "amtDue": 266.62,
+      "current": 0,
+      "d30": 266.62,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 266.62
+        }
+      ]
+    },
+    {
+      "vendor": "J and J Trailer Sales LLC",
+      "amtDue": 863.23,
+      "current": 863.23,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-25T07:00:00.000Z",
+          "dueDate": "2026-04-24T07:00:00.000Z",
+          "terms": "Net 30",
+          "amt": 863.23
+        }
+      ]
+    },
+    {
+      "vendor": "James Taber",
+      "amtDue": 700,
+      "current": 0,
+      "d30": 700,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 700
+        }
+      ]
+    },
+    {
+      "vendor": "Juzek, Kaely",
+      "amtDue": 700,
+      "current": 0,
+      "d30": 700,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 700
+        }
+      ]
+    },
+    {
+      "vendor": "Kurkowski Agronomy LLC",
+      "amtDue": 156505.3,
+      "current": 91800,
+      "d30": 64705.3,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-27T07:00:00.000Z",
+          "dueDate": "2026-04-01T07:00:00.000Z",
+          "terms": "",
+          "amt": 64705.3
+        },
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "",
+          "amt": 91800
+        }
+      ]
+    },
+    {
+      "vendor": "Lake Creek Farms, LLC",
+      "amtDue": 3,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 3,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-01-15T08:00:00.000Z",
+          "dueDate": "2026-01-15T08:00:00.000Z",
+          "terms": "",
+          "amt": 3
+        }
+      ]
+    },
+    {
+      "vendor": "Legacy Cooperative",
+      "amtDue": 2998.38,
+      "current": 2998.38,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-17T07:00:00.000Z",
+          "dueDate": "2026-04-20T07:00:00.000Z",
+          "terms": "Net 20th",
+          "amt": 2998.38
+        }
+      ]
+    },
+    {
+      "vendor": "Marker Ag",
+      "amtDue": 24654.68,
+      "current": 24654.68,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-13T07:00:00.000Z",
+          "dueDate": "2026-04-12T07:00:00.000Z",
+          "terms": "Net 30",
+          "amt": 3100
+        },
+        {
+          "invDate": "2026-03-16T07:00:00.000Z",
+          "dueDate": "2026-04-15T07:00:00.000Z",
+          "terms": "Net 30",
+          "amt": 10801.41
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-29T07:00:00.000Z",
+          "terms": "Net 30",
+          "amt": 10753.27
+        }
+      ]
+    },
+    {
+      "vendor": "McQuillan & Wendell PC LLO",
+      "amtDue": 6366.5,
+      "current": 0,
+      "d30": 6366.5,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 90
+        },
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 6276.5
+        }
+      ]
+    },
+    {
+      "vendor": "Melo, Fred",
+      "amtDue": 500,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 500,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-01-23T08:00:00.000Z",
+          "dueDate": "2026-01-23T08:00:00.000Z",
+          "terms": "",
+          "amt": 500
+        }
+      ]
+    },
+    {
+      "vendor": "Miller, Lindsay",
+      "amtDue": 1225,
+      "current": 0,
+      "d30": 1225,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 1225
+        }
+      ]
+    },
+    {
+      "vendor": "MLB Rentals & Equipment LLC",
+      "amtDue": 1926.4,
+      "current": 1926.4,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-25T07:00:00.000Z",
+          "dueDate": "2026-04-09T07:00:00.000Z",
+          "terms": "Net 15",
+          "amt": 1926.4
+        }
+      ]
+    },
+    {
+      "vendor": "Poor, Martin",
+      "amtDue": 350,
+      "current": 0,
+      "d30": 350,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 350
+        }
+      ]
+    },
+    {
+      "vendor": "Precision Stereo Technology",
+      "amtDue": 1382.3899999999999,
+      "current": 372.39,
+      "d30": 1010,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-20T07:00:00.000Z",
+          "dueDate": "2026-04-10T07:00:00.000Z",
+          "terms": "Net 10",
+          "amt": 297.39
+        },
+        {
+          "invDate": "2026-03-23T07:00:00.000Z",
+          "dueDate": "2026-03-23T07:00:00.000Z",
+          "terms": "",
+          "amt": 1010
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-10T07:00:00.000Z",
+          "terms": "Net 10",
+          "amt": 25
+        },
+        {
+          "invDate": "2026-03-30T07:00:00.000Z",
+          "dueDate": "2026-04-10T07:00:00.000Z",
+          "terms": "Net 10",
+          "amt": 50
+        }
+      ]
+    },
+    {
+      "vendor": "Productivity Plus - CNH Industrial Capital",
+      "amtDue": -4.22,
+      "current": 0,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": -4.22,
+      "invoices": [
+        {
+          "invDate": "2024-05-08T07:00:00.000Z",
+          "dueDate": "2024-05-08T07:00:00.000Z",
+          "terms": "",
+          "amt": -4.22
+        }
+      ]
+    },
+    {
+      "vendor": "Progenco, Inc",
+      "amtDue": 471875,
+      "current": 471875,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-06T07:00:00.000Z",
+          "terms": "7Days",
+          "amt": 471875
+        }
+      ]
+    },
+    {
+      "vendor": "Sandhill Oil Co., Inc.",
+      "amtDue": 3198.51,
+      "current": 0,
+      "d30": 3198.51,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-22T07:00:00.000Z",
+          "dueDate": "2026-03-22T07:00:00.000Z",
+          "terms": "",
+          "amt": 3198.51
+        }
+      ]
+    },
+    {
+      "vendor": "Smith, Jaclyn",
+      "amtDue": 714,
+      "current": 0,
+      "d30": 714,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-29T07:00:00.000Z",
+          "dueDate": "2026-03-29T07:00:00.000Z",
+          "terms": "",
+          "amt": 714
+        }
+      ]
+    },
+    {
+      "vendor": "The Animal Center",
+      "amtDue": 795.9300000000001,
+      "current": 0,
+      "d30": 795.9300000000001,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 501.57
+        },
+        {
+          "invDate": "2026-03-31T07:00:00.000Z",
+          "dueDate": "2026-03-31T07:00:00.000Z",
+          "terms": "",
+          "amt": 294.36
+        }
+      ]
+    },
+    {
+      "vendor": "Unity Networking, LLC",
+      "amtDue": 570,
+      "current": 570,
+      "d30": 0,
+      "d60": 0,
+      "d90": 0,
+      "over90": 0,
+      "invoices": [
+        {
+          "invDate": "2026-04-01T07:00:00.000Z",
+          "dueDate": "2026-04-16T07:00:00.000Z",
+          "terms": "Net 15",
+          "amt": 570
+        }
+      ]
+    }
+  ]
+}
