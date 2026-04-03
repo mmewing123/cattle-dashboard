@@ -1,54 +1,38 @@
-name: Update Dashboard
+name: Update Market Data
 
 on:
-  # Runs daily at 9:30 PM UTC (3:30 PM Central)
   schedule:
-    - cron: '30 21 * * 1-5'   # Mon-Fri after markets close
-  
-  # Manual trigger from GitHub UI
+    - cron: '30 21 * * 1-5'   # Mon-Fri 3:30 PM Central (9:30 PM UTC)
   workflow_dispatch:
 
-  # Also run on push to main (for initial setup)
-  push:
-    branches: [main]
-
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 jobs:
-  build:
+  update:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install requests
 
-      - name: Pull data & build dashboard
+      - name: Run market data script
         env:
           MARS_API_KEY: ${{ secrets.MARS_API_KEY }}
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
         run: |
-          python build_dashboard.py --api-key "$MARS_API_KEY" --output docs/index.html
+          python write_market_data.py \
+            --api-key "$MARS_API_KEY" \
+            --av-key  "$ALPHAVANTAGE_API_KEY" \
+            --output  docs/market_data.json
 
-      - name: Write market data for RM comparison
-        env:
-          MARS_API_KEY: ${{ secrets.MARS_API_KEY }}
+      - name: Commit and push
         run: |
-          python write_market_data.py --api-key "$MARS_API_KEY" --output docs/market_data.json
-
-      - name: Commit & push updated dashboard
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add docs/index.html docs/market_data.json
-          git diff --staged --quiet || git commit -m "📊 Update dashboard $(date -u +%Y-%m-%d)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/market_data.json
+          git diff --staged --quiet || git commit -m "chore: update market data $(date -u +%Y-%m-%d)"
           git push
