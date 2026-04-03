@@ -386,6 +386,37 @@ tr:hover td{background:rgba(59,130,246,.03);}
         </div>
       </div>
 
+      <!-- CORN MARKET SECTION -->
+      <div id="corn-market-section" style="display:none;margin-top:8px">
+        <div class="chart-grid" style="margin-bottom:28px">
+
+          <!-- Cash corn last 30 days -->
+          <div class="chart-card">
+            <div class="chart-head">
+              <div>
+                <div class="chart-title">CME Corn — Last 30 Days</div>
+                <div class="chart-sub">Front-month contract close price · $/bu · auto-updated daily</div>
+              </div>
+              <span class="badge badge-neutral" id="cash-corn-badge">—</span>
+            </div>
+            <canvas id="cash-corn-chart" style="max-height:240px"></canvas>
+          </div>
+
+          <!-- CME futures curve -->
+          <div class="chart-card">
+            <div class="chart-head">
+              <div>
+                <div class="chart-title">CME Corn Futures Curve</div>
+                <div class="chart-sub">All active contracts · $/bu · updated daily</div>
+              </div>
+              <span class="badge badge-neutral" id="futures-badge">—</span>
+            </div>
+            <canvas id="futures-curve-chart" style="max-height:240px"></canvas>
+          </div>
+
+        </div>
+      </div>
+
       <div class="table-card" id="txn-card" style="display:none">
         <div class="table-head-row" style="display:flex;align-items:center;justify-content:space-between">
           <span>Purchase Transactions</span>
@@ -835,6 +866,140 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
+
+// ── CORN MARKET SECTION ───────────────────────────────────────────────────────
+let cashCornChart = null;
+let futuresCurveChart = null;
+
+function renderCornSection() {
+  if (!marketData) return;
+
+  const corn = marketData.corn || [];
+  const futures = marketData.corn_futures || [];
+
+  if (!corn.length && !futures.length) return;
+  document.getElementById('corn-market-section').style.display = 'block';
+
+  // ── CME front-month corn last 30 days ──
+  if (futures.length && futures[0].history && futures[0].history.length) {
+    const front = futures[0];  // nearest active contract
+    const hist  = front.history;
+
+    const labels = hist.map(d => {
+      const [, mo, dy] = d.date.split('-');
+      return mo + '/' + dy;
+    });
+    const prices = hist.map(d => d.price);
+
+    if (cashCornChart) cashCornChart.destroy();
+    const ctx1 = document.getElementById('cash-corn-chart').getContext('2d');
+    cashCornChart = new Chart(ctx1, {
+      type: 'line',
+      data: { labels, datasets: [{
+        label: front.label + ' $/bu',
+        data: prices,
+        borderColor: '#f59e0b',
+        backgroundColor: '#f59e0b22',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        fill: true,
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor:'#1a1d27', borderColor:'#2a2d3e', borderWidth:1,
+            titleColor:'#e2e8f0', bodyColor:'#94a3b8',
+            callbacks: { label: c => ' $' + c.parsed.y.toFixed(4) + '/bu' } }
+        },
+        scales: {
+          x: { grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10}} },
+          y: { grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:10},
+                callback: v => '$' + v.toFixed(2)} }
+        }
+      }
+    });
+
+    // Badge: latest price + 30-day change
+    if (prices.length >= 2) {
+      const chg = prices[prices.length-1] - prices[0];
+      const pct = (chg / prices[0] * 100).toFixed(1);
+      const el = document.getElementById('cash-corn-badge');
+      const latest = prices[prices.length-1].toFixed(4);
+      el.textContent = chg >= 0
+        ? front.label + '  $' + latest + '  ▲ ' + pct + '%'
+        : front.label + '  $' + latest + '  ▼ ' + Math.abs(pct) + '%';
+      el.className = chg >= 0 ? 'badge badge-red' : 'badge badge-green';
+    }
+  }
+
+  // ── CME Futures Curve ──
+  if (futures.length) {
+    const labels   = futures.map(f => f.label);
+    const prices   = futures.map(f => f.price);
+    const colors   = futures.map((_, i) => {
+      const hue = 200 + (i / futures.length) * 60;
+      return `hsl(${hue}, 70%, 60%)`;
+    });
+
+    if (futuresCurveChart) futuresCurveChart.destroy();
+    const ctx2 = document.getElementById('futures-curve-chart').getContext('2d');
+    futuresCurveChart = new Chart(ctx2, {
+      type: 'line',
+      data: { labels, datasets: [{
+        label: 'CME Corn Futures $/bu',
+        data: prices,
+        borderColor: '#3b82f6',
+        backgroundColor: '#3b82f622',
+        borderWidth: 2.5,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointBackgroundColor: colors,
+        pointBorderColor: colors,
+        tension: 0.2,
+        fill: true,
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor:'#1a1d27', borderColor:'#2a2d3e', borderWidth:1,
+            titleColor:'#e2e8f0', bodyColor:'#94a3b8',
+            callbacks: {
+              label: c => ' $' + c.parsed.y.toFixed(4) + '/bu',
+              afterLabel: (c) => {
+                const f = futures[c.dataIndex];
+                return f ? '  as of ' + f.date : '';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid:{color:'#2a2d3e'}, ticks:{color:'#64748b',font:{size:11}} },
+          y: {
+            grid:{color:'#2a2d3e'},
+            ticks:{color:'#64748b',font:{size:10}, callback: v => '$'+v.toFixed(2)},
+          }
+        }
+      }
+    });
+
+    // Badge: front month price + contango/backwardation
+    if (futures.length >= 2) {
+      const el = document.getElementById('futures-badge');
+      const front = futures[0].price;
+      const back  = futures[futures.length-1].price;
+      const diff  = back - front;
+      el.textContent = diff >= 0
+        ? `Contango +$${diff.toFixed(4)}`
+        : `Backwardation -$${Math.abs(diff).toFixed(4)}`;
+      el.className = diff >= 0 ? 'badge badge-neutral' : 'badge badge-green';
+    }
+  }
+}
+
 // ══════════════════════════════════════════════════════
 // RM TAB — original code
 // ══════════════════════════════════════════════════════
@@ -862,6 +1027,7 @@ async function loadMarketData() {
   }
   // After market data loads, try to auto-load shared transaction data
   await loadSharedTransactions();
+  renderCornSection();
 }
 
 async function loadSharedTransactions() {
@@ -889,6 +1055,7 @@ async function loadSharedTransactions() {
   } catch {
     // No shared file — normal, just wait for upload
   }
+  renderCornSection();
 }
 
 function getMarketPrice(key, dateStr) {
