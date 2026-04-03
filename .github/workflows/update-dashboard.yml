@@ -20,16 +20,14 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests yfinance
 
       - name: Run market data script
         env:
           MARS_API_KEY: ${{ secrets.MARS_API_KEY }}
-          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
           python write_market_data.py \
             --api-key "$MARS_API_KEY" \
-            --td-key  "$TWELVEDATA_API_KEY" \
             --output  docs/market_data.json
 
       - name: Commit and push
