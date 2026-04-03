@@ -6,20 +6,22 @@ and writes docs/market_data.json for the BRI Operations Dashboard.
 """
 
 import os, json, requests, argparse, time
+try:
+    import yfinance as yf
+    HAS_YF = True
+except ImportError:
+    HAS_YF = False
 from datetime import datetime, date, timedelta
 from collections import defaultdict
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--api-key",  default=os.environ.get("MARS_API_KEY", ""))
-parser.add_argument("--td-key",   default=os.environ.get("TWELVEDATA_API_KEY", ""))
 parser.add_argument("--output",   default="docs/market_data.json")
 args = parser.parse_args()
 
 MARS_KEY = args.api_key
-TD_KEY   = args.td_key
 OUT_FILE = args.output
 MARS_URL = "https://marsapi.ams.usda.gov/services/v1.2/reports"
-TD_URL   = "https://api.twelvedata.com/time_series"
 
 mars = requests.Session()
 mars.auth = (MARS_KEY, "")
@@ -184,7 +186,7 @@ def active_corn_contracts(n=6):
             # Corn expires ~14th of delivery month; consider expired if past that
             exp = date(yr, mo, 14)
             if exp >= today:
-                symbol = f"ZC{code}{yr}"            # e.g. ZCK2026
+                symbol = f"ZC{code}{str(yr)[2:]}.CBT"  # e.g. ZCK26.CBT
                 label  = f"{name} '{str(yr)[2:]}"    # e.g. May '26
                 contracts.append({"symbol": symbol, "label": label, "month": mo, "year": yr})
             if len(contracts) >= n:
@@ -193,74 +195,51 @@ def active_corn_contracts(n=6):
 
 
 def fetch_corn_futures():
-    if not TD_KEY:
-        print("  No Twelve Data key — skipping futures")
+    if not HAS_YF:
+        print("  yfinance not installed — skipping futures")
         return []
 
     contracts = active_corn_contracts(6)
-    print(f"  Fetching {len(contracts)} CME corn futures contracts...")
-
-    # Twelve Data supports batch requests — fetch all symbols in one call
-    symbols = ",".join(c["symbol"] for c in contracts)
-    cutoff  = (date.today() - timedelta(days=30)).isoformat()
+    print(f"  Fetching {len(contracts)} CME corn futures via yfinance...")
 
     futures = []
-    try:
-        resp = requests.get(TD_URL, params={
-            "symbol":     symbols,
-            "interval":   "1day",
-            "outputsize": 30,
-            "apikey":     TD_KEY,
-        }, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
+    cutoff = (date.today() - timedelta(days=35)).strftime("%Y-%m-%d")
 
-        # Twelve Data returns a dict keyed by symbol when multiple symbols requested
-        # or a single object when one symbol
-        # Check for top-level error
-        if data.get("status") == "error":
-            print(f"  API error: {data.get('message','')[:100]}")
-            return []
+    for contract in contracts:
+        sym = contract["symbol"]   # e.g. ZCK26.CBT
+        try:
+            ticker = yf.Ticker(sym)
+            hist   = ticker.history(period="1mo", interval="1d")
 
-        for contract in contracts:
-            sym = contract["symbol"]
-            # Handle both single and multi-symbol responses
-            sym_data = data.get(sym, data) if len(contracts) > 1 else data
-
-            if sym_data.get("status") == "error":
-                print(f"    {sym}: error — {sym_data.get('message','')[:80]}")
-                continue
-
-            values = sym_data.get("values", [])
-            if not values:
+            if hist.empty:
                 print(f"    {sym}: no data")
                 continue
 
-            # Twelve Data returns newest first — reverse for chronological
-            values = list(reversed(values))
-
-            history = [
-                {"date": v["datetime"], "price": round(float(v["close"]) / 100, 4)}
-                for v in values
-                if v["datetime"] >= cutoff
+            # yfinance returns prices in cents for grain futures — convert to $/bu
+            rows = [
+                {"date": str(idx.date()), "price": round(float(row["Close"]) / 100, 4)}
+                for idx, row in hist.iterrows()
+                if str(idx.date()) >= cutoff
             ]
 
-            latest = values[-1]
-            latest_price = round(float(latest["close"]) / 100, 4)  # cents → $/bu
+            if not rows:
+                print(f"    {sym}: no rows in range")
+                continue
 
+            latest = rows[-1]
             futures.append({
                 "symbol":  sym,
                 "label":   contract["label"],
                 "month":   contract["month"],
                 "year":    contract["year"],
-                "price":   latest_price,
-                "date":    latest["datetime"],
-                "history": history,
+                "price":   latest["price"],
+                "date":    latest["date"],
+                "history": rows,
             })
-            print(f"    {sym} ({contract['label']}): ${latest_price:.4f}/bu  ({len(history)} days history)")
+            print(f"    {sym} ({contract['label']}): ${latest['price']:.4f}/bu  ({len(rows)} days)")
 
-    except Exception as e:
-        print(f"  Futures fetch error: {e}")
+        except Exception as e:
+            print(f"    {sym}: error — {e}")
 
     print(f"  Corn futures fetched: {len(futures)} contracts")
     return futures
