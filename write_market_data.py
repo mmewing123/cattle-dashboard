@@ -11,15 +11,15 @@ from collections import defaultdict
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--api-key",  default=os.environ.get("MARS_API_KEY", ""))
-parser.add_argument("--av-key",   default=os.environ.get("ALPHAVANTAGE_API_KEY", ""))
+parser.add_argument("--td-key",   default=os.environ.get("TWELVEDATA_API_KEY", ""))
 parser.add_argument("--output",   default="docs/market_data.json")
 args = parser.parse_args()
 
 MARS_KEY = args.api_key
-AV_KEY   = args.av_key
+TD_KEY   = args.td_key
 OUT_FILE = args.output
 MARS_URL = "https://marsapi.ams.usda.gov/services/v1.2/reports"
-AV_URL   = "https://www.alphavantage.co/query"
+TD_URL   = "https://api.twelvedata.com/time_series"
 
 mars = requests.Session()
 mars.auth = (MARS_KEY, "")
@@ -193,63 +193,69 @@ def active_corn_contracts(n=6):
 
 
 def fetch_corn_futures():
-    if not AV_KEY:
-        print("  No Alpha Vantage key — skipping futures")
+    if not TD_KEY:
+        print("  No Twelve Data key — skipping futures")
         return []
 
     contracts = active_corn_contracts(6)
     print(f"  Fetching {len(contracts)} CME corn futures contracts...")
 
+    # Twelve Data supports batch requests — fetch all symbols in one call
+    symbols = ",".join(c["symbol"] for c in contracts)
+    cutoff  = (date.today() - timedelta(days=30)).isoformat()
+
     futures = []
-    cutoff = (date.today() - timedelta(days=30)).isoformat()
+    try:
+        resp = requests.get(TD_URL, params={
+            "symbol":     symbols,
+            "interval":   "1day",
+            "outputsize": 30,
+            "apikey":     TD_KEY,
+        }, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
 
-    for i, contract in enumerate(contracts):
-        sym = contract["symbol"]
-        try:
-            resp = requests.get(AV_URL, params={
-                "function":   "TIME_SERIES_DAILY",
-                "symbol":     sym,
-                "outputsize": "compact",   # last 100 trading days
-                "apikey":     AV_KEY,
-            }, timeout=20)
-            resp.raise_for_status()
-            data = resp.json()
-
-            ts = data.get("Time Series (Daily)", {})
-            if not ts:
-                # Alpha Vantage returns Information key on rate limit
-                info = data.get("Information") or data.get("Note") or ""
-                print(f"    {sym}: no data — {info[:80]}")
+        # Twelve Data returns a dict keyed by symbol when multiple symbols requested
+        # or a single object when one symbol
+        for contract in contracts:
+            sym = contract["symbol"]
+            # Handle both single and multi-symbol responses
+            sym_data = data.get(sym, data) if len(contracts) > 1 else data
+            
+            if sym_data.get("status") == "error":
+                print(f"    {sym}: error — {sym_data.get('message','')}")
                 continue
 
-            # Latest close only for the futures curve point
-            latest_date = max(ts.keys())
-            latest_close = float(ts[latest_date]["4. close"])
+            values = sym_data.get("values", [])
+            if not values:
+                print(f"    {sym}: no data")
+                continue
 
-            # Last 30 days of history
+            # Twelve Data returns newest first — reverse for chronological
+            values = list(reversed(values))
+
             history = [
-                {"date": d, "price": round(float(ts[d]["4. close"]) / 100, 4)}
-                for d in sorted(ts.keys())
-                if d >= cutoff
+                {"date": v["datetime"], "price": round(float(v["close"]) / 100, 4)}
+                for v in values
+                if v["datetime"] >= cutoff
             ]
 
+            latest = values[-1]
+            latest_price = round(float(latest["close"]) / 100, 4)  # cents → $/bu
+
             futures.append({
-                "symbol":      sym,
-                "label":       contract["label"],
-                "month":       contract["month"],
-                "year":        contract["year"],
-                "price":       round(latest_close / 100, 4),  # AV returns cents, convert to $/bu
-                "date":        latest_date,
-                "history":     history,
+                "symbol":  sym,
+                "label":   contract["label"],
+                "month":   contract["month"],
+                "year":    contract["year"],
+                "price":   latest_price,
+                "date":    latest["datetime"],
+                "history": history,
             })
-            print(f"    {sym} ({contract['label']}): ${latest_close/100:.4f}/bu  ({len(history)} days history)")
+            print(f"    {sym} ({contract['label']}): ${latest_price:.4f}/bu  ({len(history)} days history)")
 
-        except Exception as e:
-            print(f"    {sym}: error — {e}")
-
-        # Alpha Vantage free tier: 8 calls/min — wait between calls
-        if i < len(contracts) - 1:
-            time.sleep(8)
+    except Exception as e:
+        print(f"  Futures fetch error: {e}")
 
     print(f"  Corn futures fetched: {len(futures)} contracts")
     return futures
@@ -289,7 +295,7 @@ def main():
     print(f"  Alfalfa pts:      {len(alfa)}")
     print(f"  Grass pts:        {len(grass)}")
     print(f"  WDG pts:          {len(wdg)}")
-    print(f"  Futures contracts:{len(corn_futures)}")
+    print(f"  Futures contracts: {len(corn_futures)}")
 
 
 if __name__ == "__main__":
