@@ -1,7 +1,7 @@
 """
 write_market_data.py
 ────────────────────
-Pulls USDA MARS corn/hay/WDG prices + CME corn futures via Alpha Vantage
+Pulls USDA MARS corn/hay/WDG prices + CME corn futures via Twelve Data
 and writes docs/market_data.json for the BRI Operations Dashboard.
 """
 
@@ -164,7 +164,7 @@ def fetch_wdg():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CME CORN FUTURES — Alpha Vantage TIME_SERIES_DAILY
+# CME CORN FUTURES — Twelve Data time_series
 # Active corn contracts: March(H), May(K), July(N), September(U), December(Z)
 # ─────────────────────────────────────────────────────────────────────────────
 CORN_MONTH_CODES = [
@@ -184,7 +184,7 @@ def active_corn_contracts(n=6):
             # Corn expires ~14th of delivery month; consider expired if past that
             exp = date(yr, mo, 14)
             if exp >= today:
-                symbol = f"ZC{code}{str(yr)[2:]}"   # e.g. ZCK26
+                symbol = f"ZC{code}{yr}"            # e.g. ZCK2026
                 label  = f"{name} '{str(yr)[2:]}"    # e.g. May '26
                 contracts.append({"symbol": symbol, "label": label, "month": mo, "year": yr})
             if len(contracts) >= n:
@@ -217,13 +217,18 @@ def fetch_corn_futures():
 
         # Twelve Data returns a dict keyed by symbol when multiple symbols requested
         # or a single object when one symbol
+        # Check for top-level error
+        if data.get("status") == "error":
+            print(f"  API error: {data.get('message','')[:100]}")
+            return []
+
         for contract in contracts:
             sym = contract["symbol"]
             # Handle both single and multi-symbol responses
             sym_data = data.get(sym, data) if len(contracts) > 1 else data
-            
+
             if sym_data.get("status") == "error":
-                print(f"    {sym}: error — {sym_data.get('message','')}")
+                print(f"    {sym}: error — {sym_data.get('message','')[:80]}")
                 continue
 
             values = sym_data.get("values", [])
@@ -274,7 +279,7 @@ def main():
     print("\nFetching WDG data (USDA MARS)...")
     wdg = fetch_wdg()
 
-    print("\nFetching CME corn futures (Alpha Vantage)...")
+    print("\nFetching CME corn futures (Twelve Data)...")
     corn_futures = fetch_corn_futures()
 
     market = {
